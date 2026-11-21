@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:glass_bottle"
+    },
+    {
+      "item": "sap_extractor:tree_sap_bucket"
+    }
+  ],
+  "result": {
+    "id": "sap_extractor:tree_sap_bottle"
+  }
+}

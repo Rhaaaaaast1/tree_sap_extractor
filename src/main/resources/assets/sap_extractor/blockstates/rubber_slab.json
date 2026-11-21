@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "sap_extractor:block/rubber_slab"
+    },
+    "type=double": {
+      "model": "sap_extractor:block/rubber_planks"
+    },
+    "type=top": {
+      "model": "sap_extractor:block/rubber_slab_top"
+    }
+  }
+}

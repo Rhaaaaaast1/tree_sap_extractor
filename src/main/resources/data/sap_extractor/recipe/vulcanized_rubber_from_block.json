@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "sap_extractor:vulcanized_rubber_block"
+    }
+  ],
+  "result": {
+    "id": "sap_extractor:vulcanized_rubber",
+    "count": 9
+  }
+}

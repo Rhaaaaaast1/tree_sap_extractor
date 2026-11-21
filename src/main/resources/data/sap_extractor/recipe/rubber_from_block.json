@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "sap_extractor:rubber_block"
+    }
+  ],
+  "result": {
+    "id": "sap_extractor:rubber",
+    "count": 9
+  }
+}

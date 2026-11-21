@@ -1,0 +1,17 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "tconstruct"
+    }
+  ],
+  "type": "sap_extractor:extraction",
+  "log": "tconstruct:enderbark_log",
+  "leaves": "tconstruct:ender_slime_leaves",
+  "fluid": {
+    "id": "tconstruct:ender_slime",
+    "amount": 250
+  },
+  "time": 200,
+  "priority": 100
+}

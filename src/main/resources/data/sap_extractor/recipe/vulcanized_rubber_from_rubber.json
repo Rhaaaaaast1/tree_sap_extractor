@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "sap_extractor:rubber"
+  },
+  "result": {
+    "id": "sap_extractor:vulcanized_rubber"
+  },
+  "experience": 0.3,
+  "cookingtime": 200
+}

@@ -1,0 +1,9 @@
+{
+  "values": [
+    "#minecraft:logs",
+    {
+      "id": "#tconstruct:tree_log",
+      "required": false
+    }
+  ]
+}

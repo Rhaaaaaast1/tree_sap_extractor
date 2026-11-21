@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "sap_extractor:block/rubber_sapling"
+  }
+}

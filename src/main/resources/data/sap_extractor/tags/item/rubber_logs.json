@@ -1,0 +1,9 @@
+{
+  "values": [
+    "sap_extractor:rubber_log",
+    "sap_extractor:rubber_wood",
+    "sap_extractor:stripped_rubber_log",
+    "sap_extractor:stripped_rubber_wood",
+    "sap_extractor:tapped_rubber_log"
+  ]
+}

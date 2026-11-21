@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "tag": "sap_extractor:rubber_logs"
+    }
+  ],
+  "result": {
+    "id": "sap_extractor:rubber_planks",
+    "count": 4
+  }
+}

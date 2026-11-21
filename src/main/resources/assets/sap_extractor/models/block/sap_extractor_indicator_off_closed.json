@@ -1,0 +1,83 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "0": "sap_extractor:block/sap_extractor",
+    "dark": "sap_extractor:block/indicator_bezel",
+    "off": "sap_extractor:block/indicator_off",
+    "on": "sap_extractor:block/indicator_on",
+    "particle": "#0"
+  },
+  "elements": [
+    {
+      "name": "tree_match_indicator_off",
+      "from": [
+        7.75,
+        14.42,
+        10.95
+      ],
+      "to": [
+        8.25,
+        14.52,
+        11.45
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#off"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#off"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#off"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#off"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#off"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#off"
+        }
+      },
+      "shade": false
+    }
+  ]
+}

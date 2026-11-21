@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "sap_extractor:block/rubber_planks",
+    "side": "sap_extractor:block/rubber_planks",
+    "top": "sap_extractor:block/rubber_planks"
+  }
+}

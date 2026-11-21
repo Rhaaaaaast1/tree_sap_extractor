@@ -1,0 +1,11 @@
+{
+  "type": "sap_extractor:extraction",
+  "log": "#minecraft:logs",
+  "leaves": "#minecraft:leaves",
+  "fluid": {
+    "id": "sap_extractor:tree_sap",
+    "amount": 250
+  },
+  "time": 200,
+  "priority": 0
+}

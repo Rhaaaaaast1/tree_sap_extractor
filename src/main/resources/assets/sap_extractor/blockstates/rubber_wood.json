@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "sap_extractor:block/rubber_wood",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "sap_extractor:block/rubber_wood"
+    },
+    "axis=z": {
+      "model": "sap_extractor:block/rubber_wood",
+      "x": 90
+    }
+  }
+}

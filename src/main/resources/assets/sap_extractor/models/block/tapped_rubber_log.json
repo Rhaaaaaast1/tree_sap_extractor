@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "sap_extractor:block/rubber_log",
+    "down": "sap_extractor:block/rubber_log_top",
+    "up": "sap_extractor:block/rubber_log_top",
+    "north": "sap_extractor:block/tapped_rubber_log",
+    "south": "sap_extractor:block/rubber_log",
+    "east": "sap_extractor:block/rubber_log",
+    "west": "sap_extractor:block/rubber_log"
+  }
+}

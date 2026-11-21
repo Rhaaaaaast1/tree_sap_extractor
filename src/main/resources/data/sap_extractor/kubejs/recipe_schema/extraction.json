@@ -1,0 +1,35 @@
+{
+  "keys": [
+    {
+      "name": "log",
+      "role": "input",
+      "type": "string"
+    },
+    {
+      "name": "fluid",
+      "role": "output",
+      "type": "fluid_stack"
+    },
+    {
+      "name": "time",
+      "role": "input",
+      "type": "ticks",
+      "optional": 200
+    },
+    {
+      "name": "leaves",
+      "role": "input",
+      "type": "string",
+      "optional": "#minecraft:leaves"
+    },
+    {
+      "name": "priority",
+      "role": "input",
+      "type": "int",
+      "optional": 0
+    }
+  ],
+  "unique": [
+    "log"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "type": "sap_extractor:smoking",
+  "ingredient": {
+    "item": "sap_extractor:tree_sap_bottle"
+  },
+  "result": {
+    "id": "minecraft:sugar"
+  },
+  "experience": 0.35,
+  "cookingtime": 100
+}

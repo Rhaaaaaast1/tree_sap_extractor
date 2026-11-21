@@ -1,0 +1,17 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "tconstruct"
+    }
+  ],
+  "type": "sap_extractor:extraction",
+  "log": "tconstruct:bloodshroom_log",
+  "leaves": "tconstruct:blood_slime_leaves",
+  "fluid": {
+    "id": "tconstruct:ichor",
+    "amount": 250
+  },
+  "time": 200,
+  "priority": 100
+}

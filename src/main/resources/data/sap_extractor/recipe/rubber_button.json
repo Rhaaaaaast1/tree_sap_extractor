@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "sap_extractor:rubber_planks"
+    }
+  ],
+  "result": {
+    "id": "sap_extractor:rubber_button"
+  }
+}

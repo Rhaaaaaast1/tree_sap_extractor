@@ -1,0 +1,17 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "tconstruct"
+    }
+  ],
+  "type": "sap_extractor:extraction",
+  "log": "tconstruct:skyroot_log",
+  "leaves": "tconstruct:sky_slime_leaves",
+  "fluid": {
+    "id": "tconstruct:sky_slime",
+    "amount": 250
+  },
+  "time": 200,
+  "priority": 100
+}
