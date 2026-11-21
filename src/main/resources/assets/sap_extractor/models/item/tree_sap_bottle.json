@@ -1,6 +1,13 @@
 {
-  "parent": "minecraft:item/generated",
+  "parent": "neoforge:item/default",
+  "loader": "neoforge:fluid_container",
+  "fluid": "sap_extractor:tree_sap",
   "textures": {
-    "layer0": "sap_extractor:item/tree_sap_bottle"
-  }
+    "base": "sap_extractor:item/bottle_base",
+    "fluid": "sap_extractor:item/bottle_fluid_mask",
+    "particle": "sap_extractor:item/bottle_base"
+  },
+  "flip_gas": false,
+  "cover_is_mask": false,
+  "apply_fluid_luminosity": false
 }

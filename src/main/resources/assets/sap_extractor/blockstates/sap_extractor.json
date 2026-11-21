@@ -1,296 +1,36 @@
 {
   "multipart": [
     {
-      "when": {
-        "facing": "north"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_body",
-        "y": 0
-      }
+      "when": { "facing": "north", "open": "false" },
+      "apply": { "model": "sap_extractor:block/sap_extractor", "y": 0 }
     },
     {
-      "when": {
-        "facing": "north",
-        "open": "false"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_handle_closed",
-        "y": 0
-      }
+      "when": { "facing": "north", "open": "true" },
+      "apply": { "model": "sap_extractor:block/sap_extractor_open", "y": 0 }
     },
     {
-      "when": {
-        "facing": "north",
-        "open": "false",
-        "active": "false"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_off_closed",
-        "y": 0
-      }
+      "when": { "facing": "east", "open": "false" },
+      "apply": { "model": "sap_extractor:block/sap_extractor", "y": 90 }
     },
     {
-      "when": {
-        "facing": "north",
-        "open": "false",
-        "active": "true"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_on_closed",
-        "y": 0
-      }
+      "when": { "facing": "east", "open": "true" },
+      "apply": { "model": "sap_extractor:block/sap_extractor_open", "y": 90 }
     },
     {
-      "when": {
-        "facing": "north",
-        "open": "true"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_handle_open",
-        "y": 0
-      }
+      "when": { "facing": "south", "open": "false" },
+      "apply": { "model": "sap_extractor:block/sap_extractor", "y": 180 }
     },
     {
-      "when": {
-        "facing": "north",
-        "open": "true",
-        "active": "false"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_off_open",
-        "y": 0
-      }
+      "when": { "facing": "south", "open": "true" },
+      "apply": { "model": "sap_extractor:block/sap_extractor_open", "y": 180 }
     },
     {
-      "when": {
-        "facing": "north",
-        "open": "true",
-        "active": "true"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_on_open",
-        "y": 0
-      }
+      "when": { "facing": "west", "open": "false" },
+      "apply": { "model": "sap_extractor:block/sap_extractor", "y": 270 }
     },
     {
-      "when": {
-        "facing": "east"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_body",
-        "y": 90
-      }
-    },
-    {
-      "when": {
-        "facing": "east",
-        "open": "false"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_handle_closed",
-        "y": 90
-      }
-    },
-    {
-      "when": {
-        "facing": "east",
-        "open": "false",
-        "active": "false"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_off_closed",
-        "y": 90
-      }
-    },
-    {
-      "when": {
-        "facing": "east",
-        "open": "false",
-        "active": "true"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_on_closed",
-        "y": 90
-      }
-    },
-    {
-      "when": {
-        "facing": "east",
-        "open": "true"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_handle_open",
-        "y": 90
-      }
-    },
-    {
-      "when": {
-        "facing": "east",
-        "open": "true",
-        "active": "false"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_off_open",
-        "y": 90
-      }
-    },
-    {
-      "when": {
-        "facing": "east",
-        "open": "true",
-        "active": "true"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_on_open",
-        "y": 90
-      }
-    },
-    {
-      "when": {
-        "facing": "south"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_body",
-        "y": 180
-      }
-    },
-    {
-      "when": {
-        "facing": "south",
-        "open": "false"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_handle_closed",
-        "y": 180
-      }
-    },
-    {
-      "when": {
-        "facing": "south",
-        "open": "false",
-        "active": "false"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_off_closed",
-        "y": 180
-      }
-    },
-    {
-      "when": {
-        "facing": "south",
-        "open": "false",
-        "active": "true"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_on_closed",
-        "y": 180
-      }
-    },
-    {
-      "when": {
-        "facing": "south",
-        "open": "true"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_handle_open",
-        "y": 180
-      }
-    },
-    {
-      "when": {
-        "facing": "south",
-        "open": "true",
-        "active": "false"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_off_open",
-        "y": 180
-      }
-    },
-    {
-      "when": {
-        "facing": "south",
-        "open": "true",
-        "active": "true"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_on_open",
-        "y": 180
-      }
-    },
-    {
-      "when": {
-        "facing": "west"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_body",
-        "y": 270
-      }
-    },
-    {
-      "when": {
-        "facing": "west",
-        "open": "false"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_handle_closed",
-        "y": 270
-      }
-    },
-    {
-      "when": {
-        "facing": "west",
-        "open": "false",
-        "active": "false"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_off_closed",
-        "y": 270
-      }
-    },
-    {
-      "when": {
-        "facing": "west",
-        "open": "false",
-        "active": "true"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_on_closed",
-        "y": 270
-      }
-    },
-    {
-      "when": {
-        "facing": "west",
-        "open": "true"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_handle_open",
-        "y": 270
-      }
-    },
-    {
-      "when": {
-        "facing": "west",
-        "open": "true",
-        "active": "false"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_off_open",
-        "y": 270
-      }
-    },
-    {
-      "when": {
-        "facing": "west",
-        "open": "true",
-        "active": "true"
-      },
-      "apply": {
-        "model": "sap_extractor:block/sap_extractor_indicator_on_open",
-        "y": 270
-      }
+      "when": { "facing": "west", "open": "true" },
+      "apply": { "model": "sap_extractor:block/sap_extractor_open", "y": 270 }
     }
   ]
 }

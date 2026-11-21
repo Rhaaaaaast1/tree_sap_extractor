@@ -45,18 +45,30 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
 
-    private static final VoxelShape SHAPE_NORTH = Shapes.or(
-            Block.box(4.0, 4.0, 4.0, 12.0, 16.0, 16.0),
-            Block.box(2.0, 7.0, 1.0, 14.0, 11.0, 8.0));
-    private static final VoxelShape SHAPE_SOUTH = Shapes.or(
-            Block.box(4.0, 4.0, 0.0, 12.0, 16.0, 12.0),
-            Block.box(2.0, 7.0, 8.0, 14.0, 11.0, 15.0));
-    private static final VoxelShape SHAPE_WEST = Shapes.or(
-            Block.box(4.0, 4.0, 4.0, 16.0, 16.0, 12.0),
-            Block.box(1.0, 7.0, 2.0, 8.0, 11.0, 14.0));
-    private static final VoxelShape SHAPE_EAST = Shapes.or(
-            Block.box(0.0, 4.0, 4.0, 12.0, 16.0, 12.0),
-            Block.box(8.0, 7.0, 2.0, 15.0, 11.0, 14.0));
+    private static final VoxelShape SHAPE_NORTH = makeShape(Direction.NORTH);
+    private static final VoxelShape SHAPE_SOUTH = makeShape(Direction.SOUTH);
+    private static final VoxelShape SHAPE_WEST = makeShape(Direction.WEST);
+    private static final VoxelShape SHAPE_EAST = makeShape(Direction.EAST);
+
+    private static VoxelShape makeShape(Direction facing) {
+        return Shapes.or(
+                rotatedBox(facing, 5.44, 8.8, 14.08, 10.56, 12.64, 16.0),
+                rotatedBox(facing, 6.72, 9.44, 9.6, 9.28, 12.0, 14.08),
+                rotatedBox(facing, 5.92, 12.0, 10.56, 10.08, 14.4, 13.28),
+                rotatedBox(facing, 6.88, 8.0, 6.88, 9.12, 11.36, 9.6)
+        );
+    }
+
+    private static VoxelShape rotatedBox(Direction facing,
+                                         double x1, double y1, double z1,
+                                         double x2, double y2, double z2) {
+        return switch (facing) {
+            case EAST -> Shapes.box(1.0 - z2, y1, x1, 1.0 - z1, y2, x2);
+            case SOUTH -> Shapes.box(1.0 - x2, y1, 1.0 - z2, 1.0 - x1, y2, 1.0 - z1);
+            case WEST -> Shapes.box(z1, y1, 1.0 - x2, z2, y2, 1.0 - x1);
+            default -> Shapes.box(x1, y1, z1, x2, y2, z2);
+        };
+    }
 
     public SapExtractorBlock(Properties properties) {
         super(properties);
