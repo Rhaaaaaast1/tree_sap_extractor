@@ -4,8 +4,8 @@
   "leaves": "#sap_extractor:rubber_leaves",
   "fluid": {
     "id": "sap_extractor:latex",
-    "amount": 250
+    "amount": 1
   },
-  "time": 200,
+  "time": 10,
   "priority": 100
 }

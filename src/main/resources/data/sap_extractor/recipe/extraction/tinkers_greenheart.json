@@ -10,8 +10,8 @@
   "leaves": "tconstruct:earth_slime_leaves",
   "fluid": {
     "id": "tconstruct:earth_slime",
-    "amount": 250
+    "amount": 1
   },
-  "time": 200,
+  "time": 10,
   "priority": 100
 }

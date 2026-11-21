@@ -8,8 +8,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -116,13 +119,25 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (level.isClientSide) {
-            return InteractionResult.SUCCESS;
+        if (!level.isClientSide) {
+            toggle(level, pos, state);
         }
+        return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+                                              Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (!level.isClientSide) {
+            toggle(level, pos, state);
+        }
+        return ItemInteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    private static void toggle(Level level, BlockPos pos, BlockState state) {
         boolean open = !state.getValue(OPEN);
         level.setBlock(pos, state.setValue(OPEN, open), Block.UPDATE_ALL);
         level.playSound(null, pos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.55F, open ? 1.0F : 0.7F);
-        return InteractionResult.CONSUME;
     }
 
     @Override
@@ -175,10 +190,9 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
             return;
         }
         if (random.nextInt(3) == 0) {
-            Direction facing = state.getValue(FACING);
-            double x = pos.getX() + 0.5 + facing.getStepX() * 0.57 + (random.nextDouble() - 0.5) * 0.18;
-            double y = pos.getY() + 0.53 + (random.nextDouble() - 0.5) * 0.12;
-            double z = pos.getZ() + 0.5 + facing.getStepZ() * 0.57 + (random.nextDouble() - 0.5) * 0.18;
+            double x = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.15;
+            double y = pos.getY() + 0.45;
+            double z = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.15;
             level.addParticle(net.minecraft.core.particles.ParticleTypes.DRIPPING_HONEY, x, y, z, 0.0, 0.0, 0.0);
         }
     }

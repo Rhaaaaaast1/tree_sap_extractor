@@ -7,6 +7,7 @@ NeoForge 1.21.1 模组。把铜龙头安装在树干侧面，下方放容器，�
 - **树液采集器**：放在树干侧面（背板贴树），下方必须是 `#sap_extractor:containers` 中的容器且有流体能力。默认兼容机械动力工作盆 `create:basin`。
 - **开关**：空手右键采集器顶部旋钮切换 `open`。Jade 会显示“已关闭 / 未检测到树木 / 下方没有容器 / 容器已满 / 正在采集 / 待机”，并显示进度、内部储罐和每周期产出。
 - **树木判定**：仿 Thermal 的规则，贴着的原木必须属于同一棵树，树根下方是土壤，树根与上面两格都是可采集原木，并在 3×40×3 范围内找到至少 3 片自然树叶（`persistent=false`）。可用配置关闭严格判定。
+- **统一速率**：内置配方均为每 10 tick 产出 1 mB，输出流体与树木/树叶映射仍由数据包配方决定。
 - **流体**：`sap_extractor:tree_sap`（树汁）与 `sap_extractor:latex`（胶乳），都有源/流动流体、桶和放置方块。
 - **物品**：瓶装树汁、树汁桶、胶乳桶、橡胶、硫化橡胶。桶和瓶使用 NeoForge `neoforge:fluid_container` 动态模型：桶复用原版桶壳与 `neoforge:item/mask/bucket_fluid`，瓶使用公共 `bottle_base` 瓶壳与 `bottle_fluid_mask` 遮罩，不需要为每种液体单独绘制完整图标。
 - **碰撞箱**：按底座、阀体、把手和出水嘴的实际模型边界分别设置，旋转到四个朝向时同步变换，不再使用覆盖整块方块的近似碰撞箱。
@@ -32,8 +33,8 @@ NeoForge 1.21.1 模组。把铜龙头安装在树干侧面，下方放容器，�
   "type": "sap_extractor:extraction",
   "log": "#minecraft:jungle_logs",
   "leaves": "#sap_extractor:jungle_leaves",
-  "fluid": { "id": "sap_extractor:latex", "amount": 250 },
-  "time": 200,
+  "fluid": { "id": "sap_extractor:latex", "amount": 1 },
+  "time": 10,
   "priority": 100
 }
 ```
@@ -41,7 +42,7 @@ NeoForge 1.21.1 模组。把铜龙头安装在树干侧面，下方放容器，�
 - `log`：方块 ID 或 `#方块标签`，按贴着的树干匹配。
 - `leaves`：可选，方块 ID 或标签；默认 `#minecraft:leaves`。
 - `fluid`：1.21.1 `FluidStack` 格式；也接受 KubeJS 的 `{ "fluid": "...", "amount": ... }` 旧格式。
-- `time`：一个周期 tick 数。
+- `time`：一个周期 tick 数，内置配方统一为 `1 mB / 10 tick`。
 - `priority`：数值越大越优先。默认回退配方是 0，具体树种建议 100。
 
 内置配方：
@@ -76,8 +77,8 @@ NeoForge 1.21.1 模组。把铜龙头安装在树干侧面，下方放容器，�
 ServerEvents.recipes(event => {
   event.recipes.sap_extractor.extraction(
     '#minecraft:jungle_logs',                 // log
-    Fluid.of('sap_extractor:latex', 250),     // fluid
-    200,                                      // time
+    Fluid.of('sap_extractor:latex', 1),       // fluid
+    10,                                       // time
     '#sap_extractor:jungle_leaves',           // leaves
     100                                       // priority
   )
@@ -94,8 +95,8 @@ event.custom({
   type: 'sap_extractor:extraction',
   log: 'biomesoplenty:fir_log',
   leaves: 'biomesoplenty:fir_leaves',
-  fluid: { id: 'sap_extractor:latex', amount: 250 },
-  time: 200,
+  fluid: { id: 'sap_extractor:latex', amount: 1 },
+  time: 10,
   priority: 100
 })
 ```

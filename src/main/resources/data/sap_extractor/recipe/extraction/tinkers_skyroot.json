@@ -10,8 +10,8 @@
   "leaves": "tconstruct:sky_slime_leaves",
   "fluid": {
     "id": "tconstruct:sky_slime",
-    "amount": 250
+    "amount": 1
   },
-  "time": 200,
+  "time": 10,
   "priority": 100
 }

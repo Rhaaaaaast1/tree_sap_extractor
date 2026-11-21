@@ -44,7 +44,7 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
             BlockKey.CODEC.optionalFieldOf("leaves", BlockKey.ofTag(BlockTags.LEAVES))
                     .forGetter(SapExtractionRecipe::leaves),
             FLUID_CODEC.fieldOf("fluid").forGetter(SapExtractionRecipe::fluid),
-            Codec.INT.optionalFieldOf("time", 200).forGetter(SapExtractionRecipe::time),
+            Codec.INT.optionalFieldOf("time", 10).forGetter(SapExtractionRecipe::time),
             Codec.INT.optionalFieldOf("priority", 0).forGetter(SapExtractionRecipe::priority)
     ).apply(instance, SapExtractionRecipe::new));
 

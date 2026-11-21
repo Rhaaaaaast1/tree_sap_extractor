@@ -14,7 +14,7 @@
       "name": "time",
       "role": "input",
       "type": "ticks",
-      "optional": 200
+      "optional": 10
     },
     {
       "name": "leaves",
