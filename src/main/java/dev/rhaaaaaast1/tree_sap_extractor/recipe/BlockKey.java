@@ -48,8 +48,8 @@ public record BlockKey(Optional<TagKey<Block>> tag, Optional<Block> block) {
         return serialize();
     }
 
-    public static BlockKey parseOrThrow(String value) {
-        return parse(value).getOrThrow(IllegalArgumentException::new);
+    public static BlockKey parseOrAir(String value) {
+        return parse(value).result().orElseGet(() -> ofBlock(net.minecraft.world.level.block.Blocks.AIR));
     }
 
     private static DataResult<BlockKey> parse(String value) {

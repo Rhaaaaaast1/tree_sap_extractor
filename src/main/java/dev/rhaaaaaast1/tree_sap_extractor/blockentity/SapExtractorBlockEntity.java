@@ -28,6 +28,11 @@ public class SapExtractorBlockEntity extends BlockEntity {
         protected void onContentsChanged() {
             setChanged();
         }
+
+        @Override
+        public boolean isFluidValid(FluidStack stack) {
+            return !output.isEmpty() && FluidStack.isSameFluidSameComponents(stack, output);
+        }
     };
 
     private int progress;
@@ -72,6 +77,9 @@ public class SapExtractorBlockEntity extends BlockEntity {
                 containerFull = false;
                 progress++;
                 working = true;
+                if (progress % 20 == 0) {
+                    setChanged();
+                }
                 if (progress >= cycleTime) {
                     tank.fill(output, IFluidHandler.FluidAction.EXECUTE);
                     progress = 0;

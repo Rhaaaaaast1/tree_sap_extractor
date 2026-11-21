@@ -15,7 +15,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
-import net.minecraft.world.level.Level;
 
 /**
  * A smoker-only cooking recipe which tags its sugar output with
@@ -46,19 +45,10 @@ public class SapSmokingRecipe extends AbstractCookingRecipe {
     @Override
     public ItemStack assemble(SingleRecipeInput input, HolderLookup.Provider registries) {
         ItemStack result = super.assemble(input, registries);
-        result.set(ModDataComponents.FROM_SAP_BOTTLE.get(), true);
+        if (!result.isEmpty()) {
+            result.set(ModDataComponents.FROM_SAP_BOTTLE.get(), true);
+        }
         return result;
-    }
-
-    @Override
-    public ItemStack getResultItem(HolderLookup.Provider registries) {
-        // Keep the recipe book / JEI display as ordinary sugar.
-        return new ItemStack(net.minecraft.world.item.Items.SUGAR);
-    }
-
-    @Override
-    public boolean matches(SingleRecipeInput input, Level level) {
-        return ingredient.test(input.getItem(0));
     }
 
     @Override

@@ -15,7 +15,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
@@ -94,15 +93,6 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
     protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         Direction facing = state.getValue(FACING);
         return level.getBlockState(pos.relative(facing.getOpposite())).is(ModTags.Blocks.TREE_LOGS);
-    }
-
-    @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
-                                     net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        if (direction == state.getValue(FACING).getOpposite() && !neighborState.is(ModTags.Blocks.TREE_LOGS)) {
-            return Blocks.AIR.defaultBlockState();
-        }
-        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
 
     @Override

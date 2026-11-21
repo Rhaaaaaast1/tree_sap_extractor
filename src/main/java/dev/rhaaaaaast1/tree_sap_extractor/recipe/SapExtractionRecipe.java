@@ -56,7 +56,7 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
                     ByteBufCodecs.VAR_INT, SapExtractionRecipe::time,
                     ByteBufCodecs.VAR_INT, SapExtractionRecipe::priority,
                     (log, leaves, fluid, time, priority) -> new SapExtractionRecipe(
-                            BlockKey.parseOrThrow(log), BlockKey.parseOrThrow(leaves), fluid, time, priority));
+                            BlockKey.parseOrAir(log), BlockKey.parseOrAir(leaves), fluid, time, priority));
 
     private final BlockKey log;
     private final BlockKey leaves;

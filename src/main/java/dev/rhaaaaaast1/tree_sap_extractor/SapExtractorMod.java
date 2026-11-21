@@ -78,9 +78,12 @@ public class SapExtractorMod {
             return;
         }
         Player player = (Player) event.getEntity();
-        ItemStack bottle = new ItemStack(Items.GLASS_BOTTLE);
-        if (!player.getInventory().add(bottle)) {
-            player.drop(bottle, false);
+        int bottleCount = event.getSmelting().getCount();
+        for (int i = 0; i < bottleCount; i++) {
+            ItemStack bottle = new ItemStack(Items.GLASS_BOTTLE);
+            if (!player.getInventory().add(bottle)) {
+                player.drop(bottle, false);
+            }
         }
     }
 }

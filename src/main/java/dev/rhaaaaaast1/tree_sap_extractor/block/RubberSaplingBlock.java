@@ -84,7 +84,8 @@ public class RubberSaplingBlock extends BushBlock implements BonemealableBlock {
             return;
         }
         if (RubberTreeGrower.grow(level, pos, random)) {
-            level.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+            return;
         }
+        level.setBlock(pos, state, Block.UPDATE_ALL);
     }
 }
