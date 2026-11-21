@@ -124,5 +124,10 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
         public ResourceLocation getUid() {
             return UID;
         }
+
+        @Override
+        public boolean isRequired() {
+            return true;
+        }
     }
 }
