@@ -127,6 +127,13 @@ public class FluidBasinBlockEntity extends BlockEntity {
         var litBlazeBurner = BuiltInRegistries.BLOCK.get(
                 ResourceLocation.fromNamespaceAndPath("create", "lit_blaze_burner"));
         if (litBlazeBurner != Blocks.AIR && state.is(litBlazeBurner)) {
+            // 中文：灵魂火焰视为超级燃烧，5 秒融化。
+            // English: Soul flame counts as superheated and melts in 5 seconds.
+            for (var property : state.getProperties()) {
+                if (property.getName().equals("flame_type")) {
+                    return state.getValue(property).toString().equalsIgnoreCase("soul") ? 100 : 200;
+                }
+            }
             return 200;
         }
         return 0;

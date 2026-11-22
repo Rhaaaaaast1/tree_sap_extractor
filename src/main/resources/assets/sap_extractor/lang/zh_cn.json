@@ -23,6 +23,9 @@
   "jade.sap_extractor.tank": "储罐：%s %s / %s mB",
   "jade.sap_extractor.output": "产出：%s（每周期 %s mB）",
   "jade.sap_extractor.progress": "进度：%s / %s tick",
+  "jade.sap_extractor.fluid": "%s：%s / %s mB",
+  "jade.sap_extractor.powder_snow": "细雪",
+  "jade.sap_extractor.empty": "空",
   "config.jade.plugin_sap_extractor.sap_extractor": "树液采集器",
   "jei.sap_extractor.extraction": "树汁提取器"
 }

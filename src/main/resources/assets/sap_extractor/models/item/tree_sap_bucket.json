@@ -1,13 +1,7 @@
 {
-  "parent": "neoforge:item/default",
-  "loader": "neoforge:fluid_container",
-  "fluid": "sap_extractor:tree_sap",
+  "parent": "minecraft:item/generated",
   "textures": {
-    "base": "minecraft:item/bucket",
-    "fluid": "neoforge:item/mask/bucket_fluid",
-    "particle": "minecraft:item/bucket"
-  },
-  "flip_gas": false,
-  "cover_is_mask": true,
-  "apply_fluid_luminosity": true
+    "layer0": "minecraft:item/bucket",
+    "layer1": "sap_extractor:item/tree_sap_bucket_fluid"
+  }
 }
