@@ -1,5 +1,8 @@
 package dev.rhaaaaaast1.tree_sap_extractor.blockentity;
-
+/*
+ * 中文：本文件包含 FluidBasinBlockEntity 的实现。
+ * English: This file contains the implementation of FluidBasinBlockEntity.
+ */
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -20,16 +23,13 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
-
 import dev.rhaaaaaast1.tree_sap_extractor.block.FluidBasinBlock;
-
 /**
  * Real 1000 mB tank for the fluid basin. The block state only provides the
  * basin shape; all fluid data lives here and is drawn by the BER.
  */
 public class FluidBasinBlockEntity extends BlockEntity {
     private static final int CAPACITY = FluidType.BUCKET_VOLUME;
-
     private final FluidTank tank = new FluidTank(CAPACITY) {
         @Override
         protected void onContentsChanged() {
@@ -40,21 +40,16 @@ public class FluidBasinBlockEntity extends BlockEntity {
     };
     private boolean powderSnow;
     private int powderSnowHeatTicks;
-
     private static final int POWDER_SNOW_MELT_TICKS = 200;
-
     public FluidBasinBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.FLUID_BASIN.get(), pos, state);
     }
-
     public FluidTank getTank() {
         return tank;
     }
-
     public boolean hasPowderSnow() {
         return powderSnow;
     }
-
     public void setPowderSnow(boolean powderSnow) {
         if (this.powderSnow == powderSnow) {
             return;
@@ -65,7 +60,6 @@ public class FluidBasinBlockEntity extends BlockEntity {
         updateFullState();
         syncToClient();
     }
-
     public void serverTick() {
         if (level == null || level.isClientSide) {
             return;
@@ -83,7 +77,6 @@ public class FluidBasinBlockEntity extends BlockEntity {
             meltPowderSnow();
         }
     }
-
     private boolean hasHeatSource() {
         if (level == null) {
             return false;
@@ -98,7 +91,6 @@ public class FluidBasinBlockEntity extends BlockEntity {
         }
         return false;
     }
-
     private static boolean isHeatSource(BlockState state) {
         if (state.is(Blocks.CAMPFIRE) || state.is(Blocks.SOUL_CAMPFIRE)) {
             return state.hasProperty(CampfireBlock.LIT) && state.getValue(CampfireBlock.LIT);
@@ -117,7 +109,6 @@ public class FluidBasinBlockEntity extends BlockEntity {
                 ResourceLocation.fromNamespaceAndPath("create", "lit_blaze_burner"));
         return litBlazeBurner != Blocks.AIR && state.is(litBlazeBurner);
     }
-
     private void meltPowderSnow() {
         // 细雪不是流体，所以这里直接把内容换成 1000 mB 水，再让 BER 画水。
         powderSnow = false;
@@ -127,13 +118,11 @@ public class FluidBasinBlockEntity extends BlockEntity {
         updateFullState();
         syncToClient();
     }
-
     @Override
     public void setLevel(net.minecraft.world.level.Level level) {
         super.setLevel(level);
         updateFullState();
     }
-
     private void updateFullState() {
         if (level == null) {
             return;
@@ -147,13 +136,11 @@ public class FluidBasinBlockEntity extends BlockEntity {
             level.setBlock(worldPosition, state.setValue(FluidBasinBlock.FULL, full), 3);
         }
     }
-
     private void syncToClient() {
         if (level != null && !level.isClientSide) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
-
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
@@ -161,7 +148,6 @@ public class FluidBasinBlockEntity extends BlockEntity {
         tag.putBoolean("PowderSnow", powderSnow);
         tag.putInt("PowderSnowHeatTicks", powderSnowHeatTicks);
     }
-
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
@@ -170,12 +156,10 @@ public class FluidBasinBlockEntity extends BlockEntity {
         powderSnowHeatTicks = tag.getInt("PowderSnowHeatTicks");
         updateFullState();
     }
-
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         return saveWithoutMetadata(registries);
     }
-
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);

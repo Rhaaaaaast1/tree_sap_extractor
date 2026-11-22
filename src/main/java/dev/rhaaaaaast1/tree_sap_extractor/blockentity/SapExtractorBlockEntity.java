@@ -1,5 +1,8 @@
 package dev.rhaaaaaast1.tree_sap_extractor.blockentity;
-
+/*
+ * 中文：本文件包含 SapExtractorBlockEntity 的实现。
+ * English: This file contains the implementation of SapExtractorBlockEntity.
+ */
 import dev.rhaaaaaast1.tree_sap_extractor.block.SapExtractorBlock;
 import dev.rhaaaaaast1.tree_sap_extractor.recipe.SapExtractionRecipe;
 import dev.rhaaaaaast1.tree_sap_extractor.util.SapExtractionRules;
@@ -18,17 +21,24 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-
 import javax.annotation.Nullable;
-
 /**
- * Extractor without an internal fluid buffer. Each completed cycle is inserted
- * directly into the container below.
+ * 采集器方块实体：没有内部流体缓存，产量按 tick 累加后直接送入下方容器。
+ * Extractor block entity: no internal fluid buffer; per-tick production is inserted into the container below.
  */
 public class SapExtractorBlockEntity extends BlockEntity {
+    /*
+     * 这些字段共同描述一次生产：
+     * - output 是完整周期的目标产量；
+     * - cycleTime 是基础周期（受树根四邻采集器减速影响）；
+     * - productionAccumulator 把整周期产量拆成逐 tick 的小份，避免一次性爆发。
+     * Together these fields describe one production cycle:
+     * - output is the target amount per full cycle;
+     * - cycleTime is the base cycle (slowed by adjacent extractors);
+     * - productionAccumulator splits the cycle into small per-tick outputs.
+     */
     private static final int CONTAINER_REFRESH_INTERVAL = 40;
     private static final int DEFAULT_CYCLE = 500;
-
     private int productionAccumulator;
     private int cycleTime = DEFAULT_CYCLE;
     private int containerRefreshCooldown;
@@ -40,15 +50,17 @@ public class SapExtractorBlockEntity extends BlockEntity {
     @Nullable
     private ResourceLocation recipeId;
     private FluidStack output = FluidStack.EMPTY;
-
     public SapExtractorBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.SAP_EXTRACTOR.get(), pos, state);
     }
-
     public void serverTick() {
+        // 服务端每 tick 执行；客户端只负责渲染。
+        // Runs on the server every tick; the client only renders.
         if (level == null || level.isClientSide) {
             return;
         }
+        // 只有树/容器变化时重新扫描树，避免每 tick 做 3×40×3 的方块读取。
+        // Re-scan the tree only when needed instead of reading a 3×40×3 area every tick.
         if (treeDirty) {
             refreshTree();
             treeDirty = false;
@@ -57,14 +69,12 @@ public class SapExtractorBlockEntity extends BlockEntity {
             refreshContainer();
             containerRefreshCooldown = CONTAINER_REFRESH_INTERVAL;
         }
-
         boolean canRun = getBlockState().getValue(SapExtractorBlock.OPEN)
                 && validTree
                 && hasContainer
                 && !containerFull
                 && recipeId != null
                 && !output.isEmpty();
-
         working = false;
         if (canRun) {
             working = true;
@@ -85,18 +95,15 @@ public class SapExtractorBlockEntity extends BlockEntity {
         } else {
             productionAccumulator = 0;
         }
-
         BlockState worldState = level.getBlockState(worldPosition);
         if (worldState.getValue(SapExtractorBlock.ACTIVE) != working) {
             level.setBlock(worldPosition, worldState.setValue(SapExtractorBlock.ACTIVE, working), 3);
         }
     }
-
     public void invalidateTree() {
         treeDirty = true;
         containerRefreshCooldown = 0;
     }
-
     private void refreshContainer() {
         hasContainer = SapExtractionRules.hasContainer(level, worldPosition);
         if (!hasContainer) {
@@ -113,8 +120,9 @@ public class SapExtractorBlockEntity extends BlockEntity {
             }
         }
     }
-
     private int deliverToContainer(int amount) {
+        // 只输出容器真正能接收的量，避免把整批流体算作已输出。
+        // Insert only what the container can actually accept, so no fluid is lost.
         if (level == null) {
             return 0;
         }
@@ -135,15 +143,15 @@ public class SapExtractorBlockEntity extends BlockEntity {
         containerFull = handler.fill(toInsert.copyWithAmount(1), IFluidHandler.FluidAction.SIMULATE) <= 0;
         return accepted;
     }
-
     private void refreshTree() {
+        // 重新匹配配方并缓存树根、原木数、树叶数；这里不操作容器。
+        // Re-match recipes and cache root/log/leaf counts; the container is handled separately.
         if (level == null) {
             return;
         }
         BlockState state = getBlockState();
         Direction facing = state.getValue(SapExtractorBlock.FACING);
         BlockPos trunkPos = worldPosition.relative(facing.getOpposite());
-
         TreeInfo info = SapExtractionRules.findTree(level, trunkPos);
         FluidStack previous = output;
         if (info == null) {
@@ -155,7 +163,6 @@ public class SapExtractorBlockEntity extends BlockEntity {
             SapExtractionRecipe recipe = info.recipe().value();
             recipeId = info.recipe().id();
             validTree = true;
-
             int minHeight = recipe.minHeight();
             int maxHeight = recipe.maxHeight();
             int minLeaves = recipe.minLeaves();
@@ -163,10 +170,8 @@ public class SapExtractorBlockEntity extends BlockEntity {
             double logFactor = Math.min(Math.max(info.logCount(), minHeight), maxHeight) / (double) minHeight;
             double leafFactor = Math.min(Math.max(info.leafCount(), minLeaves), maxLeaves) / (double) minLeaves;
             double sizeMultiplier = Math.sqrt(logFactor * leafFactor);
-
             int amount = Math.max(1, (int) Math.round(recipe.fluid().getAmount() * sizeMultiplier));
             output = recipe.fluid().copyWithAmount(amount);
-
             int otherExtractors = countOtherExtractors(info.root());
             cycleTime = Math.max(1, (int) Math.round(recipe.time() * (1.0 + otherExtractors * 0.5)));
         }
@@ -180,7 +185,6 @@ public class SapExtractorBlockEntity extends BlockEntity {
         containerRefreshCooldown = CONTAINER_REFRESH_INTERVAL;
         productionAccumulator = 0;
     }
-
     private int countOtherExtractors(BlockPos root) {
         if (level == null) {
             return 0;
@@ -199,40 +203,31 @@ public class SapExtractorBlockEntity extends BlockEntity {
         }
         return count;
     }
-
     public int getProgress() {
         return productionAccumulator;
     }
-
     public int getCycleTime() {
         return Math.max(1, cycleTime);
     }
-
     public boolean isValidTree() {
         return validTree;
     }
-
     public boolean hasContainer() {
         return hasContainer;
     }
-
     public boolean isContainerFull() {
         return containerFull;
     }
-
     public boolean isWorking() {
         return working;
     }
-
     public FluidStack getOutput() {
         return output;
     }
-
     @Nullable
     public ResourceLocation getRecipeId() {
         return recipeId;
     }
-
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
@@ -245,7 +240,6 @@ public class SapExtractorBlockEntity extends BlockEntity {
             tag.put("Output", output.save(registries));
         }
     }
-
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
@@ -257,12 +251,10 @@ public class SapExtractorBlockEntity extends BlockEntity {
         output = FluidStack.parseOptional(registries, tag.getCompound("Output"));
         treeDirty = true;
     }
-
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         return saveWithoutMetadata(registries);
     }
-
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);

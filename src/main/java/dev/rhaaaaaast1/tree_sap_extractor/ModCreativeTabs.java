@@ -1,5 +1,8 @@
 package dev.rhaaaaaast1.tree_sap_extractor;
-
+/*
+ * 中文：本文件包含 ModCreativeTabs 的实现。
+ * English: This file contains the implementation of ModCreativeTabs.
+ */
 import dev.rhaaaaaast1.tree_sap_extractor.fluid.ModFluids;
 import dev.rhaaaaaast1.tree_sap_extractor.item.ModItems;
 import net.minecraft.network.chat.Component;
@@ -7,7 +10,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.registries.DeferredHolder;
-
 public final class ModCreativeTabs {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB =
             ModRegistry.CREATIVE_TABS.register("sap_extractor", () -> CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 0)
@@ -26,10 +28,8 @@ public final class ModCreativeTabs {
                         output.accept(ModFluids.LATEX_BUCKET.get());
                     })
                     .build());
-
     private ModCreativeTabs() {
     }
-
     public static void init() {
     }
 }

@@ -1,5 +1,8 @@
 package dev.rhaaaaaast1.tree_sap_extractor.compat.jade;
-
+/*
+ * 中文：本文件包含 SapExtractorJadePlugin 的实现。
+ * English: This file contains the implementation of SapExtractorJadePlugin.
+ */
 import dev.rhaaaaaast1.tree_sap_extractor.ModRegistry;
 import dev.rhaaaaaast1.tree_sap_extractor.block.SapExtractorBlock;
 import dev.rhaaaaaast1.tree_sap_extractor.blockentity.SapExtractorBlockEntity;
@@ -15,25 +18,20 @@ import snownee.jade.api.IWailaCommonRegistration;
 import snownee.jade.api.IWailaPlugin;
 import snownee.jade.api.WailaPlugin;
 import snownee.jade.api.config.IPluginConfig;
-
 @WailaPlugin
 public class SapExtractorJadePlugin implements IWailaPlugin {
     public static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ModRegistry.MODID, "sap_extractor");
-
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(ServerData.INSTANCE, SapExtractorBlockEntity.class);
     }
-
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(ComponentProvider.INSTANCE, SapExtractorBlock.class);
     }
-
     public enum ServerData implements IServerDataProvider<BlockAccessor> {
         INSTANCE;
-
         @Override
         public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
             if (!(accessor.getBlockEntity() instanceof SapExtractorBlockEntity extractor)) {
@@ -45,16 +43,13 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
             tag.putBoolean("ContainerFull", extractor.isContainerFull());
             tag.putBoolean("Working", extractor.isWorking());
         }
-
         @Override
         public ResourceLocation getUid() {
             return UID;
         }
     }
-
     public enum ComponentProvider implements IBlockComponentProvider {
         INSTANCE;
-
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
             CompoundTag data = accessor.getServerData();
@@ -63,7 +58,6 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
             boolean hasContainer = data.getBoolean("HasContainer");
             boolean full = data.getBoolean("ContainerFull");
             boolean working = data.getBoolean("Working");
-
             Component status;
             if (!open) {
                 status = Component.translatable("jade.sap_extractor.status.closed");
@@ -80,12 +74,10 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
             }
             tooltip.add(Component.translatable("jade.sap_extractor.status", status));
         }
-
         @Override
         public ResourceLocation getUid() {
             return UID;
         }
-
         @Override
         public boolean isRequired() {
             return true;

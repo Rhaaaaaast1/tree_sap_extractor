@@ -1,5 +1,8 @@
 package dev.rhaaaaaast1.tree_sap_extractor.compat.jei;
-
+/*
+ * 中文：本文件包含 ExtractionRecipeCategory 的实现。
+ * English: This file contains the implementation of ExtractionRecipeCategory.
+ */
 import dev.rhaaaaaast1.tree_sap_extractor.ModRegistry;
 import dev.rhaaaaaast1.tree_sap_extractor.item.ModItems;
 import dev.rhaaaaaast1.tree_sap_extractor.recipe.SapExtractionRecipe;
@@ -13,36 +16,29 @@ import mezz.jei.api.recipe.category.AbstractRecipeCategory;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-
 import java.util.List;
-
 public class ExtractionRecipeCategory extends AbstractRecipeCategory<SapExtractionRecipe> {
     public static final RecipeType<SapExtractionRecipe> TYPE =
             RecipeType.create(ModRegistry.MODID, "extraction", SapExtractionRecipe.class);
-
     public ExtractionRecipeCategory(IGuiHelper helper) {
         super(TYPE,
                 Component.translatable("jei.sap_extractor.extraction"),
                 helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(ModItems.SAP_EXTRACTOR.get())),
                 120, 72);
     }
-
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, SapExtractionRecipe recipe, IFocusGroup focuses) {
         ItemStack leaf = firstStack(recipe.leaves().blocks().toList());
         ItemStack log = firstStack(recipe.log().blocks().toList());
-
         builder.addInputSlot(8, 8).addItemStack(leaf);
         builder.addInputSlot(28, 8).addItemStack(leaf);
         builder.addInputSlot(48, 8).addItemStack(leaf);
         builder.addInputSlot(28, 28).addItemStack(log);
         builder.addInputSlot(28, 48).addItemStack(log);
-
         builder.addOutputSlot(88, 28)
                 .addFluidStack(recipe.fluid().getFluid(), recipe.fluid().getAmount())
                 .setCustomRenderer(NeoForgeTypes.FLUID_STACK, FluidIconRenderer.INSTANCE);
     }
-
     private static ItemStack firstStack(List<Block> blocks) {
         for (Block block : blocks) {
             ItemStack stack = new ItemStack(block);

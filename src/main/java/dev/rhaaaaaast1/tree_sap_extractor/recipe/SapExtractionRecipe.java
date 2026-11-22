@@ -1,5 +1,8 @@
 package dev.rhaaaaaast1.tree_sap_extractor.recipe;
-
+/*
+ * 中文：本文件包含 SapExtractionRecipe 的实现。
+ * English: This file contains the implementation of SapExtractionRecipe.
+ */
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -16,9 +19,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.fluids.FluidStack;
-
 import java.util.function.Function;
-
 /**
  * Data-driven extraction mapping: a trunk block (or tag) + optional leaf tag
  * produces a fluid over a number of ticks. Higher priority recipes win.
@@ -32,12 +33,10 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
             BuiltInRegistries.FLUID.byNameCodec().fieldOf("fluid").forGetter(FluidStack::getFluid),
             Codec.INT.optionalFieldOf("amount", 1000).forGetter(FluidStack::getAmount)
     ).apply(instance, FluidStack::new));
-
     private static final Codec<FluidStack> FLUID_CODEC =
             Codec.either(FluidStack.CODEC, LEGACY_FLUID_CODEC).xmap(
                     either -> either.map(Function.identity(), Function.identity()),
                     Either::left);
-
     public static final MapCodec<SapExtractionRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             BlockKey.CODEC.fieldOf("log").forGetter(SapExtractionRecipe::log),
             BlockKey.CODEC.optionalFieldOf("leaves", BlockKey.ofTag(BlockTags.LEAVES))
@@ -50,7 +49,6 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
             Codec.INT.optionalFieldOf("max_leaves", 64).forGetter(SapExtractionRecipe::maxLeaves),
             Codec.INT.optionalFieldOf("priority", 0).forGetter(SapExtractionRecipe::priority)
     ).apply(instance, SapExtractionRecipe::new));
-
     public static final StreamCodec<RegistryFriendlyByteBuf, SapExtractionRecipe> STREAM_CODEC =
             StreamCodec.of(
                     (buffer, recipe) -> {
@@ -74,7 +72,6 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
                             buffer.readVarInt(),
                             buffer.readVarInt(),
                             buffer.readVarInt()));
-
     private final BlockKey log;
     private final BlockKey leaves;
     private final FluidStack fluid;
@@ -84,7 +81,6 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
     private final int minLeaves;
     private final int maxLeaves;
     private final int priority;
-
     public SapExtractionRecipe(BlockKey log, BlockKey leaves, FluidStack fluid, int time,
                                int minHeight, int maxHeight, int minLeaves, int maxLeaves, int priority) {
         this.log = log;
@@ -97,73 +93,57 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
         this.maxLeaves = Math.max(this.minLeaves, maxLeaves);
         this.priority = priority;
     }
-
     public BlockKey log() {
         return log;
     }
-
     public BlockKey leaves() {
         return leaves;
     }
-
     public FluidStack fluid() {
         return fluid;
     }
-
     public int time() {
         return time;
     }
-
     public int minHeight() {
         return minHeight;
     }
-
     public int maxHeight() {
         return maxHeight;
     }
-
     public int minLeaves() {
         return minLeaves;
     }
-
     public int maxLeaves() {
         return maxLeaves;
     }
-
     public int priority() {
         return priority;
     }
-
     @Override
     public boolean matches(RecipeInput input, Level level) {
         return false;
     }
-
     @Override
     public ItemStack assemble(RecipeInput input, HolderLookup.Provider registries) {
         return ItemStack.EMPTY;
     }
-
     @Override
     public boolean canCraftInDimensions(int width, int height) {
         return true;
     }
-
     @Override
     public ItemStack getResultItem(HolderLookup.Provider registries) {
         return ItemStack.EMPTY;
     }
-
     @Override
     public boolean isSpecial() {
         return true;
     }
-
     @Override
     public RecipeSerializer<?> getSerializer() {
         return ModRecipes.EXTRACTION_SERIALIZER.get();
     }
-
     @Override
     public RecipeType<?> getType() {
         return ModRecipes.EXTRACTION_TYPE.get();

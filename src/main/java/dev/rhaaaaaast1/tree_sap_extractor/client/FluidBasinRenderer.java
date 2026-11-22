@@ -1,5 +1,8 @@
 package dev.rhaaaaaast1.tree_sap_extractor.client;
-
+/*
+ * 中文：本文件包含 FluidBasinRenderer 的实现。
+ * English: This file contains the implementation of FluidBasinRenderer.
+ */
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.rhaaaaaast1.tree_sap_extractor.blockentity.FluidBasinBlockEntity;
@@ -14,7 +17,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
-
 /**
  * Draws the exact fluid volume inside a vanilla cauldron. Vanilla cauldron
  * models are kept empty so the side/top faces are not drawn twice.
@@ -25,15 +27,12 @@ public class FluidBasinRenderer implements BlockEntityRenderer<FluidBasinBlockEn
     private static final float BOTTOM = 2.0F / 16.0F + 0.001F;
     private static final float MIN_TOP = 2.5F / 16.0F;
     private static final float MAX_TOP = 15.0F / 16.0F;
-
     public FluidBasinRenderer(BlockEntityRendererProvider.Context context) {
     }
-
     @Override
     public int getViewDistance() {
         return 64;
     }
-
     @Override
     public void render(FluidBasinBlockEntity cauldron, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight, int packedOverlay) {
@@ -44,7 +43,6 @@ public class FluidBasinRenderer implements BlockEntityRenderer<FluidBasinBlockEn
         }
         float ratio = powderSnow ? 1.0F : Math.min(1.0F, fluid.getAmount() / (float) cauldron.getTank().getCapacity());
         float top = MIN_TOP + (MAX_TOP - MIN_TOP) * ratio;
-
         ResourceLocation texture;
         int tint;
         if (powderSnow) {
@@ -66,21 +64,18 @@ public class FluidBasinRenderer implements BlockEntityRenderer<FluidBasinBlockEn
         int red = (tint >> 16) & 0xFF;
         int green = (tint >> 8) & 0xFF;
         int blue = tint & 0xFF;
-
         VertexConsumer consumer = buffer.getBuffer(Sheets.translucentCullBlockSheet());
         PoseStack.Pose pose = poseStack.last();
         float u0 = sprite.getU0();
         float u1 = sprite.getU1();
         float v0 = sprite.getV0();
         float v1 = sprite.getV1();
-
         top(consumer, pose, top, u0, u1, v0, v1, packedLight, red, green, blue, alpha);
         north(consumer, pose, top, u0, u1, v0, v1, packedLight, red, green, blue, alpha);
         south(consumer, pose, top, u0, u1, v0, v1, packedLight, red, green, blue, alpha);
         west(consumer, pose, top, u0, u1, v0, v1, packedLight, red, green, blue, alpha);
         east(consumer, pose, top, u0, u1, v0, v1, packedLight, red, green, blue, alpha);
     }
-
     private static void top(VertexConsumer consumer, PoseStack.Pose pose, float top,
                             float u0, float u1, float v0, float v1, int light,
                             int red, int green, int blue, int alpha) {
@@ -89,7 +84,6 @@ public class FluidBasinRenderer implements BlockEntityRenderer<FluidBasinBlockEn
         vertex(consumer, pose, INNER_MAX, top, INNER_MAX, u1, v1, light, red, green, blue, alpha, 0, 1, 0);
         vertex(consumer, pose, INNER_MAX, top, INNER_MIN, u1, v0, light, red, green, blue, alpha, 0, 1, 0);
     }
-
     private static void north(VertexConsumer consumer, PoseStack.Pose pose, float top,
                               float u0, float u1, float v0, float v1, int light,
                               int red, int green, int blue, int alpha) {
@@ -98,7 +92,6 @@ public class FluidBasinRenderer implements BlockEntityRenderer<FluidBasinBlockEn
         vertex(consumer, pose, INNER_MIN, top, INNER_MIN, u1, v0, light, red, green, blue, alpha, 0, 0, -1);
         vertex(consumer, pose, INNER_MAX, top, INNER_MIN, u0, v0, light, red, green, blue, alpha, 0, 0, -1);
     }
-
     private static void south(VertexConsumer consumer, PoseStack.Pose pose, float top,
                               float u0, float u1, float v0, float v1, int light,
                               int red, int green, int blue, int alpha) {
@@ -107,7 +100,6 @@ public class FluidBasinRenderer implements BlockEntityRenderer<FluidBasinBlockEn
         vertex(consumer, pose, INNER_MAX, top, INNER_MAX, u1, v0, light, red, green, blue, alpha, 0, 0, 1);
         vertex(consumer, pose, INNER_MIN, top, INNER_MAX, u0, v0, light, red, green, blue, alpha, 0, 0, 1);
     }
-
     private static void west(VertexConsumer consumer, PoseStack.Pose pose, float top,
                              float u0, float u1, float v0, float v1, int light,
                              int red, int green, int blue, int alpha) {
@@ -116,7 +108,6 @@ public class FluidBasinRenderer implements BlockEntityRenderer<FluidBasinBlockEn
         vertex(consumer, pose, INNER_MIN, top, INNER_MAX, u1, v0, light, red, green, blue, alpha, -1, 0, 0);
         vertex(consumer, pose, INNER_MIN, top, INNER_MIN, u0, v0, light, red, green, blue, alpha, -1, 0, 0);
     }
-
     private static void east(VertexConsumer consumer, PoseStack.Pose pose, float top,
                              float u0, float u1, float v0, float v1, int light,
                              int red, int green, int blue, int alpha) {
@@ -125,7 +116,6 @@ public class FluidBasinRenderer implements BlockEntityRenderer<FluidBasinBlockEn
         vertex(consumer, pose, INNER_MAX, top, INNER_MIN, u1, v0, light, red, green, blue, alpha, 1, 0, 0);
         vertex(consumer, pose, INNER_MAX, top, INNER_MAX, u0, v0, light, red, green, blue, alpha, 1, 0, 0);
     }
-
     private static void vertex(VertexConsumer consumer, PoseStack.Pose pose,
                                float x, float y, float z, float u, float v, int light,
                                int red, int green, int blue, int alpha,

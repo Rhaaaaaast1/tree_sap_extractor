@@ -1,5 +1,8 @@
 package dev.rhaaaaaast1.tree_sap_extractor.recipe;
-
+/*
+ * 中文：本文件包含 SapSmokingRecipe 的实现。
+ * English: This file contains the implementation of SapSmokingRecipe.
+ */
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -15,7 +18,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
-
 /**
  * A smoker-only cooking recipe which tags its sugar output with
  * {@link ModDataComponents#FROM_SAP_BOTTLE}. A player event gives the empty
@@ -29,7 +31,6 @@ public class SapSmokingRecipe extends AbstractCookingRecipe {
             Codec.FLOAT.optionalFieldOf("experience", 0.35F).forGetter(recipe -> recipe.experience),
             Codec.INT.optionalFieldOf("cookingtime", 100).forGetter(recipe -> recipe.cookingTime)
     ).apply(instance, SapSmokingRecipe::new));
-
     public static final StreamCodec<RegistryFriendlyByteBuf, SapSmokingRecipe> STREAM_CODEC =
             StreamCodec.composite(
                     Ingredient.CONTENTS_STREAM_CODEC, recipe -> recipe.ingredient,
@@ -37,11 +38,9 @@ public class SapSmokingRecipe extends AbstractCookingRecipe {
                     ByteBufCodecs.FLOAT, recipe -> recipe.experience,
                     ByteBufCodecs.VAR_INT, recipe -> recipe.cookingTime,
                     SapSmokingRecipe::new);
-
     public SapSmokingRecipe(Ingredient ingredient, ItemStack result, float experience, int cookingTime) {
         super(RecipeType.SMOKING, "", CookingBookCategory.MISC, ingredient, result, experience, cookingTime);
     }
-
     @Override
     public ItemStack assemble(SingleRecipeInput input, HolderLookup.Provider registries) {
         ItemStack result = super.assemble(input, registries);
@@ -50,7 +49,6 @@ public class SapSmokingRecipe extends AbstractCookingRecipe {
         }
         return result;
     }
-
     @Override
     public RecipeSerializer<?> getSerializer() {
         return ModRecipes.SAP_SMOKING_SERIALIZER.get();

@@ -1,5 +1,8 @@
 package dev.rhaaaaaast1.tree_sap_extractor;
-
+/*
+ * 中文：本文件包含 SapExtractorMod 的实现。
+ * English: This file contains the implementation of SapExtractorMod.
+ */
 // Fuck Mojang: so many bugs, and still such low productivity.
 import com.mojang.logging.LogUtils;
 import dev.rhaaaaaast1.tree_sap_extractor.block.ModBlocks;
@@ -22,13 +25,16 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.slf4j.Logger;
-
+/**
+ * 模组入口：按依赖顺序初始化注册表、配方、粒子、配置和事件。
+ * Mod entry point: initializes registries, recipes, particles, config and events in dependency order.
+ */
 @Mod(ModRegistry.MODID)
 public class SapExtractorMod {
     public static final Logger LOGGER = LogUtils.getLogger();
-
     public SapExtractorMod(IEventBus modEventBus, ModContainer modContainer) {
-        // Force registration classes to initialize in dependency order.
+        // 先初始化依赖其他注册项的类，再统一注册，避免流体桶/方块引用顺序错误。
+        // Initialize holders first, then register them in a safe dependency order.
         ModFluids.init();
         ModBlocks.init();
         ModItems.init();
@@ -37,7 +43,8 @@ public class SapExtractorMod {
         ModDataComponents.init();
         ModCreativeTabs.init();
         ModParticles.PARTICLES.register(modEventBus);
-
+        // 所有 DeferredRegister 都必须挂到模组事件总线。
+        // Every DeferredRegister must be attached to the mod event bus.
         ModRegistry.FLUID_TYPES.register(modEventBus);
         ModRegistry.FLUIDS.register(modEventBus);
         ModRegistry.BLOCKS.register(modEventBus);
@@ -47,25 +54,29 @@ public class SapExtractorMod {
         ModRegistry.RECIPE_SERIALIZERS.register(modEventBus);
         ModRegistry.DATA_COMPONENTS.register(modEventBus);
         ModRegistry.CREATIVE_TABS.register(modEventBus);
-
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerCapabilities);
         NeoForge.EVENT_BUS.register(this);
+        // 客户端配置只影响粒子开关。
+        // Client config only controls the particle toggle.
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
     }
-
     private void commonSetup(FMLCommonSetupEvent event) {
+        // 只打印一次启动信息，方便确认数据包配方已加载。
+        // Print once so it is obvious that the data-driven recipes were loaded.
         LOGGER.info("Tree sap extractor loaded: extraction recipes are data-driven.");
     }
-
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        // 把流体盆的真实 tank 暴露给管道、桶和其他模组。
+        // Expose the basin's real tank to pipes, buckets and other mods.
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK,
                 ModBlockEntities.FLUID_BASIN.get(),
                 (blockEntity, side) -> blockEntity.getTank());
     }
-
     @SubscribeEvent
     public void onItemSmelted(PlayerEvent.ItemSmeltedEvent event) {
+        // 烟熏树汁瓶时补回空玻璃瓶，避免自定义配方吞掉瓶子。
+        // Return the empty bottle after smoking tree sap, so the custom recipe does not consume it.
         if (event.getEntity().level().isClientSide()) {
             return;
         }

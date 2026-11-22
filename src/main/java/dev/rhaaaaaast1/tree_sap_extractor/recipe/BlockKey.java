@@ -1,5 +1,8 @@
 package dev.rhaaaaaast1.tree_sap_extractor.recipe;
-
+/*
+ * 中文：本文件包含 BlockKey 的实现。
+ * English: This file contains the implementation of BlockKey.
+ */
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -8,10 +11,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-
 import java.util.Optional;
 import java.util.stream.Stream;
-
 /**
  * A block selector used by extraction recipes. Accepts either a block id
  * ({@code minecraft:oak_log}) or a block tag ({@code #minecraft:logs}).
@@ -19,22 +20,18 @@ import java.util.stream.Stream;
  */
 public record BlockKey(Optional<TagKey<Block>> tag, Optional<Block> block) {
     public static final Codec<BlockKey> CODEC = Codec.STRING.comapFlatMap(BlockKey::parse, BlockKey::serialize);
-
     public static BlockKey ofBlock(Block block) {
         return new BlockKey(Optional.empty(), Optional.of(block));
     }
-
     public static BlockKey ofTag(TagKey<Block> tag) {
         return new BlockKey(Optional.of(tag), Optional.empty());
     }
-
     public boolean matches(BlockState state) {
         if (tag.isPresent()) {
             return state.is(tag.get());
         }
         return block.isPresent() && state.is(block.get());
     }
-
     public Stream<Block> blocks() {
         if (tag.isPresent()) {
             return BuiltInRegistries.BLOCK.getTag(tag.get())
@@ -43,15 +40,12 @@ public record BlockKey(Optional<TagKey<Block>> tag, Optional<Block> block) {
         }
         return block.stream();
     }
-
     public String serializeKey() {
         return serialize();
     }
-
     public static BlockKey parseOrAir(String value) {
         return parse(value).result().orElseGet(() -> ofBlock(net.minecraft.world.level.block.Blocks.AIR));
     }
-
     private static DataResult<BlockKey> parse(String value) {
         try {
             if (value.startsWith("#")) {
@@ -67,7 +61,6 @@ public record BlockKey(Optional<TagKey<Block>> tag, Optional<Block> block) {
             return DataResult.error(() -> "Invalid block key in extraction recipe: " + value);
         }
     }
-
     private String serialize() {
         if (tag.isPresent()) {
             return "#" + tag.get().location();

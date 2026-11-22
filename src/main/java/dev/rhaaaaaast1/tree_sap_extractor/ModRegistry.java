@@ -1,5 +1,8 @@
 package dev.rhaaaaaast1.tree_sap_extractor;
-
+/*
+ * 中文：本文件包含 ModRegistry 的实现。
+ * English: This file contains the implementation of ModRegistry.
+ */
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -9,7 +12,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
-
 /**
  * Central registry holders. Registration order is handled in the mod constructor
  * (fluids -> blocks -> items) so that fluid blocks and buckets can safely resolve
@@ -17,7 +19,6 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
  */
 public final class ModRegistry {
     public static final String MODID = "sap_extractor";
-
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
     public static final DeferredRegister<FluidType> FLUID_TYPES =
@@ -33,7 +34,6 @@ public final class ModRegistry {
             DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, MODID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
-
     private ModRegistry() {
     }
 }

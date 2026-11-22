@@ -1,5 +1,8 @@
 package dev.rhaaaaaast1.tree_sap_extractor.block;
-
+/*
+ * 中文：本文件包含 FluidBasinBlock 的实现。
+ * English: This file contains the implementation of FluidBasinBlock.
+ */
 import com.mojang.serialization.MapCodec;
 import dev.rhaaaaaast1.tree_sap_extractor.blockentity.FluidBasinBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -37,9 +40,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-
 import javax.annotation.Nullable;
-
 /**
  * Basin-shaped fluid container backed by a real tank. The blockstate uses the
  * supplied full-height basin model; the fluid surface is drawn by the BER.
@@ -55,37 +56,30 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
             Block.box(2, 2, 14, 14, 16, 16),
             Block.box(1, 0, 1, 15, 2, 15)
     );
-
     public FluidBasinBlock(Properties properties) {
         super(properties, CauldronInteraction.EMPTY);
         registerDefaultState(stateDefinition.any().setValue(FULL, false));
     }
-
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FULL);
     }
-
     @Override
     protected MapCodec<? extends AbstractCauldronBlock> codec() {
         return CODEC;
     }
-
     @Override
     public boolean isFull(BlockState state) {
         return state.getValue(FULL);
     }
-
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
-
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
-
     @Override
     protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
         if (!(level.getBlockEntity(pos) instanceof FluidBasinBlockEntity basin)) {
@@ -112,7 +106,6 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
             entity.setRemainingFireTicks(Math.max(entity.getRemainingFireTicks(), 300));
         }
     }
-
     @Override
     public void handlePrecipitation(BlockState state, Level level, BlockPos pos, net.minecraft.world.level.biome.Biome.Precipitation precipitation) {
         if (precipitation != net.minecraft.world.level.biome.Biome.Precipitation.RAIN
@@ -126,7 +119,6 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
             level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 0.4F, 1.0F);
         }
     }
-
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {
@@ -157,9 +149,7 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
         if (cauldron.hasPowderSnow()) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-
         IFluidHandler tank = cauldron.getTank();
-
         if (stack.is(Items.GLASS_BOTTLE) && tank.getFluidInTank(0).is(Fluids.WATER)
                 && tank.getFluidInTank(0).getAmount() >= BOTTLE_AMOUNT) {
             tank.drain(BOTTLE_AMOUNT, IFluidHandler.FluidAction.EXECUTE);
@@ -170,7 +160,6 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
             }
             return ItemInteractionResult.sidedSuccess(false);
         }
-
         if (isWaterBottle(stack)
                 && tank.fill(new FluidStack(Fluids.WATER, BOTTLE_AMOUNT), IFluidHandler.FluidAction.SIMULATE) == BOTTLE_AMOUNT) {
             tank.fill(new FluidStack(Fluids.WATER, BOTTLE_AMOUNT), IFluidHandler.FluidAction.EXECUTE);
@@ -181,13 +170,11 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
             }
             return ItemInteractionResult.sidedSuccess(false);
         }
-
         if (FluidUtil.interactWithFluidHandler(player, hand, tank)) {
             return ItemInteractionResult.sidedSuccess(false);
         }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
-
     private static boolean isWaterBottle(ItemStack stack) {
         if (!stack.is(Items.POTION)) {
             return false;
@@ -195,7 +182,6 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
         PotionContents contents = stack.get(DataComponents.POTION_CONTENTS);
         return contents != null && contents.is(Potions.WATER);
     }
-
     @Override
     protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof FluidBasinBlockEntity cauldron) {
@@ -208,12 +194,10 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
         }
         return 0;
     }
-
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new FluidBasinBlockEntity(pos, state);
     }
-
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         return level.isClientSide ? null : (lvl, pos, st, be) -> {
