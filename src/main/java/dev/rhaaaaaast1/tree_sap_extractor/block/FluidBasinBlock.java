@@ -70,6 +70,16 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
     }
 
     @Override
+    protected void entityInside(BlockState state, Level level, BlockPos pos, net.minecraft.world.entity.Entity entity) {
+        if (level.getBlockEntity(pos) instanceof FluidBasinBlockEntity basin) {
+            FluidStack fluid = basin.getTank().getFluid();
+            if (fluid.is(Fluids.WATER) && fluid.getAmount() > 0) {
+                entity.clearFire();
+            }
+        }
+    }
+
+    @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.isClientSide) {

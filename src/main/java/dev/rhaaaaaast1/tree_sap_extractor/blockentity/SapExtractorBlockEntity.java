@@ -55,13 +55,14 @@ public class SapExtractorBlockEntity extends BlockEntity {
             treeDirty = false;
         }
         if (--containerRefreshCooldown <= 0) {
-            hasContainer = SapExtractionRules.hasContainer(level, worldPosition);
+            refreshContainer();
             containerRefreshCooldown = CONTAINER_REFRESH_INTERVAL;
         }
 
         boolean canRun = getBlockState().getValue(SapExtractorBlock.OPEN)
                 && validTree
                 && hasContainer
+                && !containerFull
                 && recipeId != null
                 && !output.isEmpty();
 
@@ -93,6 +94,22 @@ public class SapExtractorBlockEntity extends BlockEntity {
     public void invalidateTree() {
         treeDirty = true;
         containerRefreshCooldown = 0;
+    }
+
+    private void refreshContainer() {
+        hasContainer = SapExtractionRules.hasContainer(level, worldPosition);
+        if (!hasContainer) {
+            containerFull = false;
+            return;
+        }
+        if (containerFull && level != null) {
+            IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK,
+                    worldPosition.below(), Direction.UP);
+            if (handler != null && handler.fill(new FluidStack(output.getFluid(), 1),
+                    IFluidHandler.FluidAction.SIMULATE) > 0) {
+                containerFull = false;
+            }
+        }
     }
 
     private int deliverToContainer(int amount) {
