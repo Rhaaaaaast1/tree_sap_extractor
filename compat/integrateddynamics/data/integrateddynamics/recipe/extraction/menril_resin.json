@@ -10,7 +10,7 @@
   "leaves": "integrateddynamics:menril_leaves",
   "fluid": {
     "id": "integrateddynamics:menril_resin",
-    "amount": 20
+    "amount": 10
   },
   "time": 500,
   "min_height": 3,

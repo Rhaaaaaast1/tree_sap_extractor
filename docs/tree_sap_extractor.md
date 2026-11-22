@@ -113,7 +113,7 @@ cycleTime = max(1, round(time * (1 + otherExtractors * 0.5)))
 - `sap_extractor:tree_sap_from_logs`：`#minecraft:logs` 与 `#minecraft:leaves`，树汁 10 mB，`priority` 0，作为通用回退，`leaves` 与 `log` 的匹配范围不同，可覆盖未单独配置的树。
 - `minecraft:` 命名空间下的 8 个原版树种：橡木、云杉、白桦、丛林、金合欢、深色橡木、樱桃、红树。除丛林产出 30 mB 胶乳外，其余产出 15 mB 树汁，`priority` 均为 100。
 - `tconstruct:` 命名空间下的 4 个史莱姆树配方：血菌木、末影菌木、绿心木、天空木，各产出 15 mB 对应史莱姆流体。
-- `integrateddynamics:menril_resin`：门瑞欧原木产出 20 mB 门瑞欧树脂。
+- `integrateddynamics:menril_resin`：门瑞欧原木产出 10 mB 门瑞欧树脂。
 
 原版树种与匠魂配方都在 `compat` 资源根内，打包后仍位于 `data/minecraft` 与 `data/tconstruct` 命名空间。
 
@@ -174,7 +174,9 @@ compat/<modid>/
 
 方块标签不能在不同资源根中重复同一条路径。`data/sap_extractor/tags/block/tree_logs.json` 与 `containers.json` 只存在于主资源目录，兼容模组的标签条目以 `required: false` 追加在这两个文件里，对方模组未安装时该条目被忽略。
 
-门瑞欧树脂是完整示例。配方放在 `compat/integrateddynamics/data/integrateddynamics/recipe/extraction/menril_resin.json`，`log` 使用 `#integrateddynamics:menril_logs`，覆盖门瑞欧原木、带树脂的原木、去皮原木与对应的木块；`leaves` 使用 `integrateddynamics:menril_leaves`；`fluid` 为 20 mB；`time` 500；`priority` 100。配方带 `neoforge:mod_loaded` 条件。主标签同时把 `#integrateddynamics:menril_logs` 加入 `tree_logs`，把 `integrateddynamics:drying_basin` 与 `integrateddynamics:mechanical_drying_basin` 加入 `containers`，两条都是可选条目。缺少 `tree_logs` 条目时，采集器右键门瑞欧原木不会出现放置状态。
+门瑞欧树脂是完整示例。配方放在 `compat/integrateddynamics/data/integrateddynamics/recipe/extraction/menril_resin.json`，`log` 使用 `#integrateddynamics:menril_logs`，覆盖门瑞欧原木、带树脂的原木、去皮原木与对应的木块；`leaves` 使用 `integrateddynamics:menril_leaves`；`fluid` 为 10 mB；`time` 500；`priority` 100。配方带 `neoforge:mod_loaded` 条件。主标签同时把 `#integrateddynamics:menril_logs` 加入 `tree_logs`，把 `integrateddynamics:drying_basin` 与 `integrateddynamics:mechanical_drying_basin` 加入 `containers`，两条都是可选条目。缺少 `tree_logs` 条目时，采集器右键门瑞欧原木不会出现放置状态。
+
+门瑞欧树由 `integrateddynamics:tree_menril` 生成，主干高度 5 到 9 格，底座与顶部各有十字加粗段，连续原木数为 8 到 12 格，树冠半径 2、固定 5 层。中心列从底座到加粗段顶端保持连续，采集器贴在中心列距地面 0 到 3 格的位置可以正常判定；贴在加粗段侧面的方块上，放置能通过，树根搜索失败，界面显示未检测到树木。10 mB 的基础产量在这个树干尺寸下每周期产出约 53 到 65 mB，与原版树种持平。
 
 ## 标签
 
