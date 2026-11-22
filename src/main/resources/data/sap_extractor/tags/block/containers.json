@@ -4,9 +4,6 @@
       "id": "create:basin",
       "required": false
     },
-    "minecraft:cauldron",
-    "minecraft:water_cauldron",
-    "minecraft:lava_cauldron",
-    "minecraft:powder_snow_cauldron"
+    "sap_extractor:fluid_cauldron"
   ]
 }

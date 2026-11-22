@@ -21,7 +21,7 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import javax.annotation.Nullable;
 
 public class SapExtractorBlockEntity extends BlockEntity {
-    private static final int REFRESH_INTERVAL = 20;
+    private static final int REFRESH_INTERVAL = 40;
 
     private final FluidTank tank = new FluidTank(Config.tankCapacity) {
         @Override

@@ -2,7 +2,7 @@ package dev.rhaaaaaast1.tree_sap_extractor.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.rhaaaaaast1.tree_sap_extractor.blockentity.CauldronTankBlockEntity;
+import dev.rhaaaaaast1.tree_sap_extractor.blockentity.FluidCauldronBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
@@ -19,18 +19,23 @@ import net.neoforged.neoforge.fluids.FluidStack;
  * Draws the exact fluid volume inside a vanilla cauldron. Vanilla cauldron
  * models are kept empty so the side/top faces are not drawn twice.
  */
-public class CauldronTankRenderer implements BlockEntityRenderer<CauldronTankBlockEntity> {
+public class FluidCauldronRenderer implements BlockEntityRenderer<FluidCauldronBlockEntity> {
     private static final float INNER_MIN = 3.0F / 16.0F;
     private static final float INNER_MAX = 13.0F / 16.0F;
     private static final float BOTTOM = 4.0F / 16.0F;
     private static final float MIN_TOP = 6.0F / 16.0F;
     private static final float MAX_TOP = 15.0F / 16.0F;
 
-    public CauldronTankRenderer(BlockEntityRendererProvider.Context context) {
+    public FluidCauldronRenderer(BlockEntityRendererProvider.Context context) {
     }
 
     @Override
-    public void render(CauldronTankBlockEntity cauldron, float partialTick, PoseStack poseStack,
+    public int getViewDistance() {
+        return 64;
+    }
+
+    @Override
+    public void render(FluidCauldronBlockEntity cauldron, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight, int packedOverlay) {
         FluidStack fluid = cauldron.getTank().getFluid();
         if (fluid.isEmpty()) {

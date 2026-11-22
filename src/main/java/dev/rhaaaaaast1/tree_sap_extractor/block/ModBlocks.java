@@ -29,6 +29,8 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 public final class ModBlocks {
     public static final DeferredBlock<SapExtractorBlock> SAP_EXTRACTOR =
             ModRegistry.BLOCKS.register("sap_extractor", () -> new SapExtractorBlock(extractorProperties()));
+    public static final DeferredBlock<FluidCauldronBlock> FLUID_CAULDRON =
+            ModRegistry.BLOCKS.register("fluid_cauldron", () -> new FluidCauldronBlock(cauldronProperties()));
 
     public static final DeferredBlock<RotatedPillarBlock> RUBBER_LOG =
             ModRegistry.BLOCKS.register("rubber_log", () -> new RotatedPillarBlock(woodProperties()));
@@ -90,6 +92,15 @@ public final class ModBlocks {
                 .instrument(NoteBlockInstrument.BELL)
                 .strength(3.0F, 6.0F)
                 .sound(SoundType.COPPER)
+                .noOcclusion();
+    }
+
+    private static BlockBehaviour.Properties cauldronProperties() {
+        return BlockBehaviour.Properties.of()
+                .mapColor(MapColor.STONE)
+                .requiresCorrectToolForDrops()
+                .strength(2.0F, 6.0F)
+                .sound(SoundType.METAL)
                 .noOcclusion();
     }
 

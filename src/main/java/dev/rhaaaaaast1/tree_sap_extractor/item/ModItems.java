@@ -11,6 +11,8 @@ import net.neoforged.neoforge.registries.DeferredItem;
 public final class ModItems {
     public static final DeferredItem<BlockItem> SAP_EXTRACTOR =
             ModRegistry.ITEMS.registerSimpleBlockItem("sap_extractor", ModBlocks.SAP_EXTRACTOR);
+    public static final DeferredItem<BlockItem> FLUID_CAULDRON =
+            ModRegistry.ITEMS.registerSimpleBlockItem("fluid_cauldron", ModBlocks.FLUID_CAULDRON);
 
     public static final DeferredItem<BlockItem> RUBBER_LOG =
             ModRegistry.ITEMS.registerSimpleBlockItem("rubber_log", ModBlocks.RUBBER_LOG);

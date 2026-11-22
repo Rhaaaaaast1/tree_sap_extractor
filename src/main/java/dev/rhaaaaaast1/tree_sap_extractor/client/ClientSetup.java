@@ -34,6 +34,6 @@ public final class ClientSetup {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(ModBlockEntities.CAULDRON_TANK.get(), CauldronTankRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.FLUID_CAULDRON.get(), FluidCauldronRenderer::new);
     }
 }

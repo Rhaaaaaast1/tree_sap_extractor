@@ -93,6 +93,7 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
             } else {
                 status = Component.translatable("jade.sap_extractor.status.idle");
             }
+            tooltip.clear();
             tooltip.add(Component.translatable("jade.sap_extractor.status", status));
         }
 

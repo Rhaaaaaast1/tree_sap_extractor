@@ -2,7 +2,6 @@ package dev.rhaaaaaast1.tree_sap_extractor;
 
 import com.mojang.logging.LogUtils;
 import dev.rhaaaaaast1.tree_sap_extractor.block.ModBlocks;
-import dev.rhaaaaaast1.tree_sap_extractor.blockentity.CauldronTankBlockEntity;
 import dev.rhaaaaaast1.tree_sap_extractor.blockentity.ModBlockEntities;
 import dev.rhaaaaaast1.tree_sap_extractor.fluid.ModFluids;
 import dev.rhaaaaaast1.tree_sap_extractor.item.ModItems;
@@ -13,7 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerPotBlock;
-import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -51,7 +49,7 @@ public class SapExtractorMod {
         ModRegistry.CREATIVE_TABS.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(EventPriority.HIGHEST, this::registerCapabilities);
+        modEventBus.addListener(this::registerCapabilities);
         NeoForge.EVENT_BUS.register(this);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
@@ -69,11 +67,9 @@ public class SapExtractorMod {
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK,
                 ModBlockEntities.SAP_EXTRACTOR.get(),
                 (blockEntity, side) -> blockEntity.getFluidHandler(side));
-        event.registerBlock(Capabilities.FluidHandler.BLOCK,
-                (level, pos, state, blockEntity, side) -> blockEntity instanceof CauldronTankBlockEntity cauldron
-                        ? cauldron.getTank()
-                        : null,
-                Blocks.CAULDRON, Blocks.WATER_CAULDRON, Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON);
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK,
+                ModBlockEntities.FLUID_CAULDRON.get(),
+                (blockEntity, side) -> blockEntity.getTank());
     }
 
     @SubscribeEvent
