@@ -90,7 +90,7 @@ cycleTime = max(1, round(time * (1 + otherExtractors * 0.5)))
 
 ## 数据包配方
 
-配方类型为 `sap_extractor:extraction`，文件放在 `data/<命名空间>/recipe/extraction/<id>.json`，配方 id 由文件路径决定。
+配方类型为 `sap_extractor:extraction`，文件放在 `data/sap_extractor/recipe/extraction/<id>.json`，配方 id 由文件路径决定，全部位于 `sap_extractor` 命名空间。
 
 | 字段 | 类型 | 默认值 | 作用 |
 | --- | --- | --- | --- |
@@ -110,12 +110,12 @@ cycleTime = max(1, round(time * (1 + otherExtractors * 0.5)))
 
 现有配方：
 
-- `sap_extractor:tree_sap_from_logs`：`#minecraft:logs` 与 `#minecraft:leaves`，树汁 10 mB，`priority` 0，作为通用回退，`leaves` 与 `log` 的匹配范围不同，可覆盖未单独配置的树。
-- `minecraft:` 命名空间下的 8 个原版树种：橡木、云杉、白桦、丛林、金合欢、深色橡木、樱桃、红树。除丛林产出 30 mB 胶乳外，其余产出 15 mB 树汁，`priority` 均为 100。
-- `tconstruct:` 命名空间下的 4 个史莱姆树配方：血菌木、末影菌木、绿心木、天空木，各产出 15 mB 对应史莱姆流体。
-- `integrateddynamics:menril_log` 与 `integrateddynamics:menril_log_filled`：门瑞欧原木与带树脂原木各一条配方，各产出 10 mB 门瑞欧树脂。
+- `sap_extractor:extraction/tree_sap_from_logs`：`#minecraft:logs` 与 `#minecraft:leaves`，树汁 10 mB，`priority` 0，作为通用回退，`leaves` 与 `log` 的匹配范围不同，可覆盖未单独配置的树。
+- 8 个原版树种配方：橡木、云杉、白桦、丛林、金合欢、深色橡木、樱桃、红树。除丛林产出 30 mB 胶乳外，其余产出 15 mB 树汁，`priority` 均为 100。
+- `extraction/compat/tconstruct` 下的 4 个史莱姆树配方：血菌木、末影菌木、绿心木、天空木，各产出 15 mB 对应史莱姆流体。
+- `extraction/compat/integrateddynamics` 下的门瑞欧配方：`menril_log` 与 `menril_log_filled` 各一条，各产出 10 mB 门瑞欧树脂。
 
-原版树种与匠魂配方都在 `compat` 资源根内，打包后仍位于 `data/minecraft` 与 `data/tconstruct` 命名空间。
+全部配方都位于 `sap_extractor` 命名空间，配方 id 由 `data/sap_extractor/recipe` 之后的路径决定。
 
 ## KubeJS
 
@@ -154,27 +154,30 @@ event.custom({
 })
 ```
 
-删除配方时按命名空间过滤。通用配方在 `sap_extractor` 命名空间，原版树种在 `minecraft` 命名空间，匠魂与门瑞欧配方分别在对应模组命名空间：
+所有采集配方都在 `sap_extractor` 命名空间，按模组过滤会整体删除：
 
 ```js
 event.remove({ type: 'sap_extractor:extraction', mod: 'sap_extractor' })
-event.remove({ type: 'sap_extractor:extraction', mod: 'minecraft' })
+```
+
+只删除单条配方时按配方 id 过滤，id 由文件路径决定：
+
+```js
+event.remove({ id: 'sap_extractor:extraction/compat/tconstruct/tinkers_skyroot' })
 ```
 
 ## 兼容目录
 
-兼容数据按模组分目录，目录结构固定为：
+兼容配方同样放在主资源目录里，按配方类型分目录：
 
 ```text
-compat/<modid>/
-  data/<对方命名空间>/recipe/extraction/<id>.json
+data/sap_extractor/recipe/extraction/compat/<modid>/<id>.json
+data/sap_extractor/recipe/compat/<modid>/<id>.json
 ```
 
-`build.gradle` 遍历 `compat` 下的所有子目录并加入主资源集，新增兼容模组只需创建目录，不需要修改构建脚本。兼容配方写入 `data/<对方命名空间>`，因此配方 id 天然属于对方模组，与其他模组的数据包互不冲突。
+第一行是采集配方，第二行是其他类型的兼容配方。每条兼容配方都带 `neoforge:mod_loaded` 条件，对方模组未安装时整条配方被跳过。方块标签的兼容条目以 `required: false` 追加在 `data/sap_extractor/tags/block/tree_logs.json` 与 `containers.json` 里，对方模组未安装时该条目被忽略。
 
-方块标签不能在不同资源根中重复同一条路径。`data/sap_extractor/tags/block/tree_logs.json` 与 `containers.json` 只存在于主资源目录，兼容模组的标签条目以 `required: false` 追加在这两个文件里，对方模组未安装时该条目被忽略。
-
-门瑞欧树脂按方块拆成两条配方：`compat/integrateddynamics/data/integrateddynamics/recipe/extraction/menril_log.json` 对应 `integrateddynamics:menril_log`，`menril_log_filled.json` 对应 `integrateddynamics:menril_log_filled`；两条的 `leaves` 都是 `integrateddynamics:menril_leaves`，`fluid` 10 mB，`time` 500，`priority` 100，并带 `neoforge:mod_loaded` 条件。主标签把这两个方块 id 以 `required: false` 加入 `tree_logs`，把 `integrateddynamics:drying_basin` 与 `integrateddynamics:mechanical_drying_basin` 加入 `containers`。缺少 `tree_logs` 条目时，采集器右键门瑞欧原木不会出现放置状态。
+门瑞欧树脂按方块拆成两条配方：`data/sap_extractor/recipe/extraction/compat/integrateddynamics/menril_log.json` 对应 `integrateddynamics:menril_log`，`menril_log_filled.json` 对应 `integrateddynamics:menril_log_filled`；两条的 `leaves` 都是 `integrateddynamics:menril_leaves`，`fluid` 10 mB，`time` 500，`priority` 100，并带 `neoforge:mod_loaded` 条件。主标签把这两个方块 id 以 `required: false` 加入 `tree_logs`，把 `integrateddynamics:drying_basin` 与 `integrateddynamics:mechanical_drying_basin` 加入 `containers`。缺少 `tree_logs` 条目时，采集器右键门瑞欧原木不会出现放置状态。
 
 门瑞欧树由 `integrateddynamics:tree_menril` 生成，主干高度 5 到 9 格，底座与顶部各有十字加粗段，连续原木数为 8 到 12 格，树冠半径 2、固定 5 层。中心列从底座到加粗段顶端保持连续，采集器贴在中心列距地面 0 到 3 格的位置可以正常判定；贴在加粗段侧面的方块上，放置能通过，树根搜索失败，界面显示未检测到树木。10 mB 的基础产量在这个树干尺寸下每周期产出约 53 到 65 mB，与原版树种持平。
 

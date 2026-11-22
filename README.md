@@ -55,7 +55,7 @@ cycleTicks = time * (1 + otherExtractors * 0.5)
 
 ## 数据包配方
 
-配方类型为 `sap_extractor:extraction`，路径为 `data/<命名空间>/recipe/extraction/<id>.json`。通用配方位于 `data/sap_extractor/recipe/extraction`，原版树种配方位于 `compat/minecraft` 资源根，打包后进入 `data/minecraft/recipe/extraction`。
+配方类型为 `sap_extractor:extraction`，路径为 `data/sap_extractor/recipe/extraction/<id>.json`。原版树种与通用回退配方都放在这里，兼容模组的配方放在 `extraction/compat/<modid>` 下；Create 的压块配方类型不同，放在 `data/sap_extractor/recipe/compat/create`。
 
 ```json
 {
