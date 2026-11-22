@@ -7,14 +7,13 @@ NeoForge 1.21.1 模组。把铜龙头安装在树干侧面，下方放容器，�
 - **树液采集器**：放在树干侧面（背板贴树），下方必须是 `#sap_extractor:containers` 中的容器且有流体能力。默认兼容机械动力工作盆 `create:basin`。
 - **开关**：空手右键采集器顶部旋钮切换 `open`。Jade 只显示状态：已关闭 / 未检测到树木 / 下方没有容器 / 容器已满 / 正在采集 / 待机。
 - **树木判定**：贴着的原木必须属于同一棵树，树根下方是土壤，树根与上面两格都是可采集原木，并在 3×40×3 范围内找到至少 3 片自然树叶（`persistent=false`）。
-- **速率**：内置树汁配方每 10 tick 产出 1 mB；橡胶木产胶乳每 5 tick 产出 1 mB，是内置配方中最快的。产量和周期仍由数据包配方决定。
+- **速率**：内置树汁配方每 10 tick 产出 1 mB；丛林胶乳同样为每 10 tick 产出 1 mB。产量和周期仍由数据包配方决定。
 - **流体盆**：新增 `sap_extractor:fluid_basin`，使用去底座流体盆模型、原版炼药锅材质和真实 1000 mB `FluidTank`，支持 1 mB 精度管道；BER 按真实流体贴图绘制液面，水瓶交互固定为 250 mB。
 - **流体**：`sap_extractor:tree_sap`（树汁）与 `sap_extractor:latex`（胶乳），都有源/流动流体、桶和放置方块。
 - **物品**：瓶装树汁、树汁桶、胶乳桶、橡胶、硫化橡胶。桶使用 NeoForge `neoforge:fluid_container` 动态模型，复用原版桶壳与 `neoforge:item/mask/bucket_fluid`。瓶装树汁使用原生 16×16 手绘树汁叠层，通过物品模型 JSON 引用原版玻璃瓶。
 - **碰撞箱**：按底座、阀体、把手和出水嘴的实际模型边界分别设置，旋转到四个朝向时同步变换，不再使用覆盖整块方块的近似碰撞箱。
 - **烟熏炉**：瓶装树汁 → 糖，并返还空玻璃瓶（通过给糖打上内部组件，玩家取出时返还瓶子）。
-- **橡胶树**：橡胶树苗可生长为橡胶树；默认在丛林类生物群系少量自然生成。完整橡胶木/木板/楼梯/台阶/栅栏/栅栏门/门/活板门/按钮/压力板/树叶/橡胶块/硫化橡胶块。
-- **配置**：`allowRubberWoodGeneration` 默认 `true`。设为 `false` 后，橡胶树不再自然生成，所有橡胶木相关物品从创造模式物品栏隐藏，相关配方在数据包重载时移除，只能通过 `/give` 获取。
+- **橡胶材料**：保留橡胶、橡胶块、硫化橡胶和硫化橡胶块；橡胶木、橡胶树苗、橡胶树叶及其木板/楼梯/台阶/栅栏/门等衍生方块不提供，也不进行世界生成。
 - **兼容**：Jade、JEI、KubeJS（数据驱动 schema）、Tinkers' Construct 史莱姆树、Create 压块配方。Biomes O' Plenty 等模组树木可通过原版 `#minecraft:logs` 回退或数据包配方兼容。
 
 ## 放置
@@ -51,7 +50,6 @@ NeoForge 1.21.1 模组。把铜龙头安装在树干侧面，下方放容器，�
 
 - `#minecraft:logs` → 树汁（回退，priority 0）
 - `#minecraft:jungle_logs` → 胶乳（priority 100）
-- `#sap_extractor:rubber_logs` → 胶乳（priority 100）
 - 匠魂：绿心木/天空木/血菌木/末影木 → 对应黏液（带 `neoforge:mod_loaded` 条件）
 
 ### Biomes O' Plenty 等模组树
@@ -108,7 +106,6 @@ event.custom({
 - `sap_extractor:containers`：可接收产物的方块，默认可选 `create:basin`。
 - `sap_extractor:tree_soil`：树根下方可接受的土壤，默认 `#minecraft:dirt`、`#c:stones` 等。
 - `sap_extractor:tree_logs`：允许放置采集器的原木，默认 `#minecraft:logs`，可选 `#tconstruct:tree_log`。
-- `sap_extractor:rubber_logs` / `sap_extractor:rubber_leaves`：橡胶树。
 - `sap_extractor:jungle_leaves`：丛林树叶（原版没有 `#minecraft:jungle_leaves`）。
 
 ## Create 压块

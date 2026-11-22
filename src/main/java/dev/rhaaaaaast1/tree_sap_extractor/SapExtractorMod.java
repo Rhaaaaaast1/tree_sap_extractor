@@ -7,24 +7,17 @@ import dev.rhaaaaaast1.tree_sap_extractor.fluid.ModFluids;
 import dev.rhaaaaaast1.tree_sap_extractor.item.ModItems;
 import dev.rhaaaaaast1.tree_sap_extractor.particle.ModParticles;
 import dev.rhaaaaaast1.tree_sap_extractor.recipe.ModRecipes;
-import dev.rhaaaaaast1.tree_sap_extractor.util.RubberRecipeFilter;
-import dev.rhaaaaaast1.tree_sap_extractor.worldgen.ModFeatures;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FlowerPotBlock;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.slf4j.Logger;
 
@@ -41,7 +34,6 @@ public class SapExtractorMod {
         ModRecipes.init();
         ModDataComponents.init();
         ModCreativeTabs.init();
-        ModFeatures.FEATURES.register(modEventBus);
         ModParticles.PARTICLES.register(modEventBus);
 
         ModRegistry.FLUID_TYPES.register(modEventBus);
@@ -57,27 +49,16 @@ public class SapExtractorMod {
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerCapabilities);
         NeoForge.EVENT_BUS.register(this);
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
-        event.enqueueWork(() -> {
-            FlowerPotBlock pot = (FlowerPotBlock) Blocks.FLOWER_POT;
-            pot.addPlant(ResourceLocation.fromNamespaceAndPath(ModRegistry.MODID, "rubber_sapling"),
-                    ModBlocks.RUBBER_SAPLING);
-        });
-        LOGGER.info("Tree sap extractor loaded: {} extraction recipes are data-driven.", ModRegistry.MODID);
+        LOGGER.info("Tree sap extractor loaded: extraction recipes are data-driven.");
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK,
                 ModBlockEntities.FLUID_CAULDRON.get(),
                 (blockEntity, side) -> blockEntity.getTank());
-    }
-
-    @SubscribeEvent
-    public void onAddReloadListener(AddReloadListenerEvent event) {
-        event.addListener(new RubberRecipeFilter(event.getServerResources()));
     }
 
     @SubscribeEvent

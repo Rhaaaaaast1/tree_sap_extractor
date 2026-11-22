@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "sap_extractor:block/rubber_leaves"
-      }
-    }
-  ]
-}

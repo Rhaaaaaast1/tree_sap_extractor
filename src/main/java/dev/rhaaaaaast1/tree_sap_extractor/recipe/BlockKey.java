@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 /**
  * A block selector used by extraction recipes. Accepts either a block id
- * ({@code sap_extractor:rubber_log}) or a block tag ({@code #minecraft:logs}).
+ * ({@code minecraft:oak_log}) or a block tag ({@code #minecraft:logs}).
  * Keeping this a plain string makes datapacks and KubeJS scripts trivial.
  */
 public record BlockKey(Optional<TagKey<Block>> tag, Optional<Block> block) {

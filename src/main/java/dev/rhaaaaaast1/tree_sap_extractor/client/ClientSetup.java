@@ -25,11 +25,6 @@ public final class ClientSetup {
             ItemBlockRenderTypes.setRenderLayer(ModFluids.TREE_SAP_BLOCK.get(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(ModFluids.LATEX_BLOCK.get(), RenderType.translucent());
 
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.RUBBER_LEAVES.get(), RenderType.cutoutMipped());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.RUBBER_SAPLING.get(), RenderType.cutout());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.POTTED_RUBBER_SAPLING.get(), RenderType.cutout());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.RUBBER_DOOR.get(), RenderType.cutout());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.RUBBER_TRAPDOOR.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.SAP_EXTRACTOR.get(), RenderType.cutout());
         });
     }

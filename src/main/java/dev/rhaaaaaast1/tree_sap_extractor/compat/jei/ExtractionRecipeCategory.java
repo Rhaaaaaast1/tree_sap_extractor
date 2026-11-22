@@ -25,24 +25,32 @@ public class ExtractionRecipeCategory extends AbstractRecipeCategory<SapExtracti
         super(TYPE,
                 Component.translatable("jei.sap_extractor.extraction"),
                 helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(ModItems.SAP_EXTRACTOR.get())),
-                120, 50);
+                120, 64);
     }
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, SapExtractionRecipe recipe, IFocusGroup focuses) {
-        Map<Block, ItemStack> logs = new LinkedHashMap<>();
-        recipe.log().blocks().forEach(block -> {
+        List<ItemStack> logs = stacks(recipe.log().blocks().toList());
+        List<ItemStack> leaves = stacks(recipe.leaves().blocks().toList());
+
+        builder.addInputSlot(18, 18).addItemStacks(logs);
+        builder.addInputSlot(18, 38).addItemStacks(logs);
+        builder.addInputSlot(8, 8).addItemStacks(leaves);
+        builder.addInputSlot(28, 8).addItemStacks(leaves);
+        builder.addInputSlot(8, 28).addItemStacks(leaves);
+
+        builder.addOutputSlot(88, 18)
+                .addFluidStack(recipe.fluid().getFluid(), recipe.fluid().getAmount());
+    }
+
+    private static List<ItemStack> stacks(List<Block> blocks) {
+        Map<Block, ItemStack> result = new LinkedHashMap<>();
+        blocks.forEach(block -> {
             ItemStack stack = new ItemStack(block);
             if (!stack.isEmpty()) {
-                logs.putIfAbsent(block, stack);
+                result.putIfAbsent(block, stack);
             }
         });
-        builder.addInputSlot(8, 8)
-                .setStandardSlotBackground()
-                .addItemStacks(List.copyOf(logs.values()));
-        builder.addOutputSlot(82, 8)
-                .setOutputSlotBackground()
-                .addFluidStack(recipe.fluid().getFluid(), recipe.fluid().getAmount())
-                .setFluidRenderer(recipe.fluid().getAmount(), true, 16, 16);
+        return List.copyOf(result.values());
     }
 }
