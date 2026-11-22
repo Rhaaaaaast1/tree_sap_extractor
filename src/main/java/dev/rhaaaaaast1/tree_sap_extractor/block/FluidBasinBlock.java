@@ -47,7 +47,7 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
     public static final BooleanProperty FULL = BooleanProperty.create("full");
     public static final BooleanProperty POWDER_SNOW = BooleanProperty.create("powder_snow");
     private static final int BOTTLE_AMOUNT = 250;
-    private static final int DRIP_AMOUNT = 250;
+    private static final int DRIP_AMOUNT = 5;
     private static final VoxelShape SHAPE = Shapes.or(
             Block.box(0, 2, 0, 2, 16, 16),
             Block.box(14, 2, 0, 16, 16, 16),
@@ -127,8 +127,8 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
     @Override
     protected void receiveStalactiteDrip(BlockState state, Level level, BlockPos pos,
                                           net.minecraft.world.level.material.Fluid fluid) {
-        // 中文：一次滴落补充 250 mB，而不是整桶 1000 mB；满 tank 时由 FluidTank 自行拒绝。
-        // English: A drip adds 250 mB, not a full bucket; a full tank rejects it through FluidTank.
+        // 中文：一次滴落只补充 5 mB，符合单滴滴落的感觉；满 tank 时由 FluidTank 拒绝。
+        // English: A drip adds only 5 mB, matching a single drip; a full tank rejects it through FluidTank.
         if (level.getBlockEntity(pos) instanceof FluidBasinBlockEntity basin) {
             basin.getTank().fill(new FluidStack(fluid, DRIP_AMOUNT), IFluidHandler.FluidAction.EXECUTE);
         }
