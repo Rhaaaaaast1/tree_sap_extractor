@@ -4,9 +4,9 @@ NeoForge 1.21.1 模组。把铜制龙头贴在树干侧面，在正下方放带�
 
 ## 玩法
 
-采集器只能贴在属于 `sap_extractor:tree_logs` 的方块侧面，背板贴树，出水嘴朝外。正下方必须是属于 `sap_extractor:containers` 且提供流体处理能力的方块。右键采集器顶部的旋钮切换开关，开启后满足条件即开始工作。
+采集器只能贴在属于 `sap_extractor:tree_logs` 的方块侧面，背板贴树，出水嘴朝外。正下方必须是属于 `sap_extractor:containers` 且提供流体处理能力的方块。右键采集器任意面切换开关，开启后满足条件即开始工作。
 
-产物直接写入下方容器，每 tick 累加产量，按周期拆成 1 mB 输出，不会等到整周期结束才一次性注入。容器装满时停止工作并停止粒子，容器重新出现 1 mB 空间后自动恢复。树干被破坏时采集器掉落。
+产物直接写入下方容器，每 tick 累加产量并按周期均摊注入，不会等到整周期结束才一次性输出。容器装满时停止工作并停止粒子，容器重新出现 1 mB 空间后自动恢复。树干被破坏时采集器掉落。
 
 信息提示层只显示状态：已关闭、未检测到树木、下方没有容器、容器已满、正在采集、待机。
 
@@ -49,13 +49,13 @@ cycleTicks = time * (1 + otherExtractors * 0.5)
 
 流体盆有真实的 1000 mB `FluidTank`，支持 1 mB 精度输入输出，比较器按储量比例输出信号。渲染层按实际流体贴图绘制液面，最高到 `15/16` 格。水瓶交互固定为 250 mB。
 
-水可以灭火，熔岩会造成伤害并点燃，细雪会逐 tick 增加冻结值并减速。细雪存在时会检查下方和四个水平相邻方块的热源，普通热源 200 tick 融化，更强的热源 100 tick 融化；融化后细雪变成 1000 mB 水。雨天会缓慢补充 1 mB 水。
+水可以灭火，熔岩会造成伤害并点燃，细雪会逐 tick 增加冻结值并减速。细雪存在时会检查下方和四个水平相邻方块的热源，普通热源 200 tick 融化，更强的热源 100 tick 融化；融化后细雪变成 1000 mB 水。雨天每次降水 tick 补充 1 mB 水。
 
 钟乳石滴落逻辑保留在代码中，当前由 `ENABLE_DRIPSTONE=false` 禁用，每次滴落量为 5 mB。
 
 ## 数据包配方
 
-配方类型为 `sap_extractor:extraction`，路径为 `data/<命名空间>/recipe/extraction/<id>.json`。通用配方位于 `data/sap_extractor/recipe/extraction`，内置的原版树种配方位于 `data/minecraft/recipe/extraction`。
+配方类型为 `sap_extractor:extraction`，路径为 `data/<命名空间>/recipe/extraction/<id>.json`。通用配方位于 `data/sap_extractor/recipe/extraction`，原版树种配方位于 `compat/minecraft` 资源根，打包后进入 `data/minecraft/recipe/extraction`。
 
 ```json
 {
@@ -80,7 +80,7 @@ cycleTicks = time * (1 + otherExtractors * 0.5)
 - `min_leaves` 默认 3，`max_leaves` 默认 64，构造时保证 `max_leaves >= min_leaves`。
 - `priority` 默认 0，数值越大越优先。
 
-字段含义、判定细节、产量公式和脚本写法见 `docs/datapack.md`。
+字段含义、判定细节、产量公式、脚本写法与兼容约定见 `docs/tree_sap_extractor.md`。
 
 ## 标签
 
