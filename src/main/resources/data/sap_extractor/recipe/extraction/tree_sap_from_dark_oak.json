@@ -1,6 +1,6 @@
 {
   "type": "sap_extractor:extraction",
-  "log": "#minecraft:dark_oak_logs",
+  "log": "minecraft:dark_oak_log",
   "leaves": "minecraft:dark_oak_leaves",
   "fluid": {
     "id": "sap_extractor:tree_sap",

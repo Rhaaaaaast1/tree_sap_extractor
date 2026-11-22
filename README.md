@@ -60,7 +60,7 @@ cycleTicks = time * (1 + otherExtractors * 0.5)
 ```json
 {
   "type": "sap_extractor:extraction",
-  "log": "#minecraft:oak_logs",
+  "log": "minecraft:oak_log",
   "leaves": "minecraft:oak_leaves",
   "fluid": { "id": "sap_extractor:tree_sap", "amount": 15 },
   "time": 500,

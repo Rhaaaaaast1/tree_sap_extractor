@@ -1,6 +1,6 @@
 {
   "type": "sap_extractor:extraction",
-  "log": "#minecraft:mangrove_logs",
+  "log": "minecraft:mangrove_log",
   "leaves": "minecraft:mangrove_leaves",
   "fluid": {
     "id": "sap_extractor:tree_sap",

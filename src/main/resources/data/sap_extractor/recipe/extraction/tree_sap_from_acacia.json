@@ -1,6 +1,6 @@
 {
   "type": "sap_extractor:extraction",
-  "log": "#minecraft:acacia_logs",
+  "log": "minecraft:acacia_log",
   "leaves": "minecraft:acacia_leaves",
   "fluid": {
     "id": "sap_extractor:tree_sap",

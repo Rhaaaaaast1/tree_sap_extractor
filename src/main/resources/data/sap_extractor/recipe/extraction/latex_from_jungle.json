@@ -1,6 +1,6 @@
 {
   "type": "sap_extractor:extraction",
-  "log": "#minecraft:jungle_logs",
+  "log": "minecraft:jungle_log",
   "leaves": "#sap_extractor:jungle_leaves",
   "fluid": {
     "id": "sap_extractor:latex",

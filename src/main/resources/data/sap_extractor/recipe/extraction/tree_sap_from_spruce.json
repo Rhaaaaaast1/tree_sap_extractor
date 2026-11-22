@@ -1,6 +1,6 @@
 {
   "type": "sap_extractor:extraction",
-  "log": "#minecraft:spruce_logs",
+  "log": "minecraft:spruce_log",
   "leaves": "minecraft:spruce_leaves",
   "fluid": {
     "id": "sap_extractor:tree_sap",

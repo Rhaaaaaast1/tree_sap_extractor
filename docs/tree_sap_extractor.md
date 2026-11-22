@@ -124,7 +124,7 @@ schema 文件位于 `data/sap_extractor/kubejs/recipe_schema/extraction.json`，
 ```js
 ServerEvents.recipes(event => {
   event.recipes.sap_extractor.extraction(
-    '#minecraft:oak_logs',                  // log
+    'minecraft:oak_log',                    // log
     'minecraft:oak_leaves',                 // leaves
     Fluid.of('sap_extractor:tree_sap', 15), // fluid 与 amount
     500,                                     // time
