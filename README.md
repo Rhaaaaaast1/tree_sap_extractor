@@ -7,7 +7,7 @@ NeoForge 1.21.1 模组。把铜龙头安装在树干侧面，下方放容器，�
 - **树液采集器**：放在树干侧面（背板贴树），下方必须是 `#sap_extractor:containers` 中的容器且有流体能力。默认兼容机械动力工作盆 `create:basin`。
 - **开关**：空手右键采集器顶部旋钮切换 `open`。Jade 只显示状态：已关闭 / 未检测到树木 / 下方没有容器 / 容器已满 / 正在采集 / 待机。
 - **树木判定**：贴着的原木必须属于同一棵树，树根下方是土壤，树根与上面两格都是可采集原木，并在 3×40×3 范围内找到至少 3 片自然树叶（`persistent=false`）。
-- **速率**：内置树汁配方每 10 tick 产出 1 mB；丛林胶乳同样为每 10 tick 产出 1 mB。产量和周期仍由数据包配方决定。
+- **速率**：周期和产量由数据包控制，默认周期 500 tick；单周期产量按树尺寸缩放。树根四个水平相邻位置每多一个采集器，周期增加 50%。
 - **流体盆**：新增 `sap_extractor:fluid_basin`，使用去底座流体盆模型、原版炼药锅材质和真实 1000 mB `FluidTank`，支持 1 mB 精度管道；BER 按真实流体贴图绘制液面，水瓶交互固定为 250 mB。
 - **流体**：`sap_extractor:tree_sap`（树汁）与 `sap_extractor:latex`（胶乳），都有源/流动流体、桶和放置方块。
 - **物品**：瓶装树汁、树汁桶、胶乳桶、橡胶、硫化橡胶。桶使用 NeoForge `neoforge:fluid_container` 动态模型，复用原版桶壳与 `neoforge:item/mask/bucket_fluid`。瓶装树汁使用原生 16×16 手绘树汁叠层，通过物品模型 JSON 引用原版玻璃瓶。
@@ -34,8 +34,12 @@ NeoForge 1.21.1 模组。把铜龙头安装在树干侧面，下方放容器，�
   "type": "sap_extractor:extraction",
   "log": "#minecraft:jungle_logs",
   "leaves": "#sap_extractor:jungle_leaves",
-  "fluid": { "id": "sap_extractor:latex", "amount": 1 },
-  "time": 10,
+  "fluid": { "id": "sap_extractor:latex", "amount": 50 },
+  "time": 500,
+  "min_height": 3,
+  "max_height": 32,
+  "min_leaves": 3,
+  "max_leaves": 64,
   "priority": 100
 }
 ```
@@ -43,7 +47,9 @@ NeoForge 1.21.1 模组。把铜龙头安装在树干侧面，下方放容器，�
 - `log`：方块 ID 或 `#方块标签`，按贴着的树干匹配。
 - `leaves`：可选，方块 ID 或标签；默认 `#minecraft:leaves`。
 - `fluid`：1.21.1 `FluidStack` 格式；也接受 KubeJS 的 `{ "fluid": "...", "amount": ... }` 旧格式。
-- `time`：一个周期 tick 数，内置配方统一为 `1 mB / 10 tick`。
+- `time`：基础周期 tick，默认 500。
+- `min_height` / `max_height`：有效树干最小高度、参与产量计算的最大原木数。
+- `min_leaves` / `max_leaves`：有效树最小树叶数、参与产量计算的最大树叶数。
 - `priority`：数值越大越优先。默认回退配方是 0，具体树种建议 100。
 
 内置配方：
@@ -76,11 +82,15 @@ NeoForge 1.21.1 模组。把铜龙头安装在树干侧面，下方放容器，�
 ```js
 ServerEvents.recipes(event => {
   event.recipes.sap_extractor.extraction(
-    '#minecraft:jungle_logs',                 // log
-    Fluid.of('sap_extractor:latex', 1),       // fluid
-    10,                                       // time
-    '#sap_extractor:jungle_leaves',           // leaves
-    100                                       // priority
+    '#minecraft:jungle_logs',                  // log
+    '#sap_extractor:jungle_leaves',            // leaves
+    Fluid.of('sap_extractor:latex', 50),       // fluid, amount
+    500,                                        // time
+    3,                                          // min_height
+    32,                                         // max_height
+    3,                                          // min_leaves
+    64,                                         // max_leaves
+    100                                         // priority
   )
 
   // 删除/修改
@@ -95,8 +105,12 @@ event.custom({
   type: 'sap_extractor:extraction',
   log: 'biomesoplenty:fir_log',
   leaves: 'biomesoplenty:fir_leaves',
-  fluid: { id: 'sap_extractor:latex', amount: 1 },
-  time: 10,
+  fluid: { id: 'sap_extractor:latex', amount: 50 },
+  time: 500,
+  min_height: 3,
+  max_height: 32,
+  min_leaves: 3,
+  max_leaves: 64,
   priority: 100
 })
 ```

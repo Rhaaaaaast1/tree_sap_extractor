@@ -6,6 +6,12 @@
       "type": "string"
     },
     {
+      "name": "leaves",
+      "role": "input",
+      "type": "string",
+      "optional": "#minecraft:leaves"
+    },
+    {
       "name": "fluid",
       "role": "output",
       "type": "fluid_stack"
@@ -14,13 +20,31 @@
       "name": "time",
       "role": "input",
       "type": "ticks",
-      "optional": 10
+      "optional": 500
     },
     {
-      "name": "leaves",
+      "name": "min_height",
       "role": "input",
-      "type": "string",
-      "optional": "#minecraft:leaves"
+      "type": "int",
+      "optional": 3
+    },
+    {
+      "name": "max_height",
+      "role": "input",
+      "type": "int",
+      "optional": 32
+    },
+    {
+      "name": "min_leaves",
+      "role": "input",
+      "type": "int",
+      "optional": 3
+    },
+    {
+      "name": "max_leaves",
+      "role": "input",
+      "type": "int",
+      "optional": 64
     },
     {
       "name": "priority",

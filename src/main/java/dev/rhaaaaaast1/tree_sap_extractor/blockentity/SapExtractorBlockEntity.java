@@ -3,6 +3,7 @@ package dev.rhaaaaaast1.tree_sap_extractor.blockentity;
 import dev.rhaaaaaast1.tree_sap_extractor.block.SapExtractorBlock;
 import dev.rhaaaaaast1.tree_sap_extractor.recipe.SapExtractionRecipe;
 import dev.rhaaaaaast1.tree_sap_extractor.util.SapExtractionRules;
+import dev.rhaaaaaast1.tree_sap_extractor.util.SapExtractionRules.TreeInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -11,8 +12,8 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -26,11 +27,13 @@ import javax.annotation.Nullable;
  * directly into the container below.
  */
 public class SapExtractorBlockEntity extends BlockEntity {
-    private static final int REFRESH_INTERVAL = 40;
+    private static final int CONTAINER_REFRESH_INTERVAL = 40;
+    private static final int DEFAULT_CYCLE = 500;
 
     private int progress;
-    private int cycleTime = 10;
-    private int refreshCooldown;
+    private int cycleTime = DEFAULT_CYCLE;
+    private int containerRefreshCooldown;
+    private boolean treeDirty = true;
     private boolean validTree;
     private boolean hasContainer;
     private boolean containerFull;
@@ -47,9 +50,13 @@ public class SapExtractorBlockEntity extends BlockEntity {
         if (level == null || level.isClientSide) {
             return;
         }
-        if (--refreshCooldown <= 0) {
-            refresh();
-            refreshCooldown = REFRESH_INTERVAL;
+        if (treeDirty) {
+            refreshTree();
+            treeDirty = false;
+        }
+        if (--containerRefreshCooldown <= 0) {
+            hasContainer = SapExtractionRules.hasContainer(level, worldPosition);
+            containerRefreshCooldown = CONTAINER_REFRESH_INTERVAL;
         }
 
         boolean canRun = getBlockState().getValue(SapExtractorBlock.OPEN)
@@ -80,6 +87,10 @@ public class SapExtractorBlockEntity extends BlockEntity {
         }
     }
 
+    public void invalidateTree() {
+        treeDirty = true;
+    }
+
     private boolean deliverToContainer() {
         if (level == null) {
             return false;
@@ -91,12 +102,17 @@ public class SapExtractorBlockEntity extends BlockEntity {
             containerFull = false;
             return false;
         }
-        int filled = handler.fill(output, IFluidHandler.FluidAction.EXECUTE);
-        containerFull = filled < output.getAmount();
-        return !containerFull;
+        int accepted = handler.fill(output, IFluidHandler.FluidAction.SIMULATE);
+        if (accepted < output.getAmount()) {
+            containerFull = true;
+            return false;
+        }
+        handler.fill(output, IFluidHandler.FluidAction.EXECUTE);
+        containerFull = false;
+        return true;
     }
 
-    private void refresh() {
+    private void refreshTree() {
         if (level == null) {
             return;
         }
@@ -104,18 +120,31 @@ public class SapExtractorBlockEntity extends BlockEntity {
         Direction facing = state.getValue(SapExtractorBlock.FACING);
         BlockPos trunkPos = worldPosition.relative(facing.getOpposite());
 
-        RecipeHolder<SapExtractionRecipe> holder = SapExtractionRules.findRecipe(level, trunkPos);
+        TreeInfo info = SapExtractionRules.findTree(level, trunkPos);
         FluidStack previous = output;
-        if (holder == null) {
+        if (info == null) {
             recipeId = null;
             validTree = false;
             output = FluidStack.EMPTY;
-            cycleTime = 10;
+            cycleTime = DEFAULT_CYCLE;
         } else {
-            recipeId = holder.id();
+            SapExtractionRecipe recipe = info.recipe().value();
+            recipeId = info.recipe().id();
             validTree = true;
-            output = holder.value().fluid().copy();
-            cycleTime = Math.max(1, holder.value().time());
+
+            int minHeight = recipe.minHeight();
+            int maxHeight = recipe.maxHeight();
+            int minLeaves = recipe.minLeaves();
+            int maxLeaves = recipe.maxLeaves();
+            double logFactor = Math.min(Math.max(info.logCount(), minHeight), maxHeight) / (double) minHeight;
+            double leafFactor = Math.min(Math.max(info.leafCount(), minLeaves), maxLeaves) / (double) minLeaves;
+            double sizeMultiplier = Math.sqrt(logFactor * leafFactor);
+
+            int amount = Math.max(1, (int) Math.round(recipe.fluid().getAmount() * sizeMultiplier));
+            output = recipe.fluid().copyWithAmount(amount);
+
+            int otherExtractors = countOtherExtractors(info.root());
+            cycleTime = Math.max(1, (int) Math.round(recipe.time() * (1.0 + otherExtractors * 0.5)));
         }
         if (!FluidStack.isSameFluidSameComponents(previous, output)
                 || previous.getAmount() != output.getAmount()) {
@@ -124,6 +153,25 @@ public class SapExtractorBlockEntity extends BlockEntity {
         }
         hasContainer = SapExtractionRules.hasContainer(level, worldPosition);
         containerFull = false;
+        containerRefreshCooldown = CONTAINER_REFRESH_INTERVAL;
+    }
+
+    private int countOtherExtractors(BlockPos root) {
+        if (level == null) {
+            return 0;
+        }
+        Block extractor = getBlockState().getBlock();
+        int count = 0;
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            BlockPos pos = root.relative(direction);
+            if (pos.equals(worldPosition)) {
+                continue;
+            }
+            if (level.getBlockState(pos).is(extractor)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public int getProgress() {
@@ -181,6 +229,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
             recipeId = ResourceLocation.tryParse(tag.getString("Recipe"));
         }
         output = FluidStack.parseOptional(registries, tag.getCompound("Output"));
+        treeDirty = true;
     }
 
     @Override

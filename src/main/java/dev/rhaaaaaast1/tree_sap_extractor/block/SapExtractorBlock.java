@@ -115,6 +115,9 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
 
     @Override
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
+        if (level.getBlockEntity(pos) instanceof SapExtractorBlockEntity extractor) {
+            extractor.invalidateTree();
+        }
         if (!state.canSurvive(level, pos)) {
             level.destroyBlock(pos, true);
         }

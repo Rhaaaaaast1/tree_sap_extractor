@@ -10,8 +10,12 @@
   "leaves": "tconstruct:blood_slime_leaves",
   "fluid": {
     "id": "tconstruct:ichor",
-    "amount": 1
+    "amount": 50
   },
-  "time": 10,
+  "time": 500,
+  "min_height": 3,
+  "max_height": 32,
+  "min_leaves": 3,
+  "max_leaves": 64,
   "priority": 100
 }

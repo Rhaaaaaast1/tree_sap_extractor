@@ -16,20 +16,19 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Tree and container validation modelled after Thermal's arboreal extractor rules:
- * the root must stand on soil, the root and the two logs above it must be
- * extractable, and there must be several natural (non-persistent) leaves in the
- * 3x40x3 area above the extractor. Candidate recipes are checked in priority
- * order so a mismatched high-priority recipe does not hide a valid fallback.
+ * Tree validation kept close to the previous mining-tree rules: soil under the
+ * root, a contiguous trunk, and natural leaves in a 3x40x3 area. The recipe
+ * controls the minimum/maximum trunk height and leaf count.
  */
 public final class SapExtractionRules {
-    private static final int REQUIRED_LEAVES = 3;
-
     private SapExtractionRules() {
     }
 
+    public record TreeInfo(RecipeHolder<SapExtractionRecipe> recipe, BlockPos root, int logCount, int leafCount) {
+    }
+
     @Nullable
-    public static RecipeHolder<SapExtractionRecipe> findRecipe(Level level, BlockPos attachedLog) {
+    public static TreeInfo findTree(Level level, BlockPos attachedLog) {
         List<RecipeHolder<SapExtractionRecipe>> candidates = new ArrayList<>(
                 level.getRecipeManager().getAllRecipesFor(ModRecipes.EXTRACTION_TYPE.get()));
         candidates.sort(Comparator
@@ -42,15 +41,20 @@ public final class SapExtractionRules {
             if (!holder.value().log().matches(attachedState)) {
                 continue;
             }
-            if (isValidTree(level, attachedLog, holder.value())) {
-                return holder;
+            TreeInfo info = validateTree(level, attachedLog, holder);
+            if (info != null) {
+                return info;
             }
         }
         return null;
     }
 
-    public static boolean isValidTree(Level level, BlockPos attachedLog, SapExtractionRecipe recipe) {
+    @Nullable
+    private static TreeInfo validateTree(Level level, BlockPos attachedLog, RecipeHolder<SapExtractionRecipe> holder) {
+        SapExtractionRecipe recipe = holder.value();
         BlockPos root = null;
+        int logCount = 0;
+
         for (int down = 0; down <= 3; down++) {
             BlockPos candidate = attachedLog.below(down);
             if (!recipe.log().matches(level.getBlockState(candidate))) {
@@ -59,14 +63,21 @@ public final class SapExtractionRules {
             if (!level.getBlockState(candidate.below()).is(ModTags.Blocks.TREE_SOIL)) {
                 continue;
             }
-            if (recipe.log().matches(level.getBlockState(candidate.above()))
-                    && recipe.log().matches(level.getBlockState(candidate.above(2)))) {
+            int count = 0;
+            for (int dy = 0; dy < recipe.maxHeight(); dy++) {
+                if (!recipe.log().matches(level.getBlockState(candidate.above(dy)))) {
+                    break;
+                }
+                count++;
+            }
+            if (count >= recipe.minHeight()) {
                 root = candidate;
+                logCount = count;
                 break;
             }
         }
         if (root == null) {
-            return false;
+            return null;
         }
 
         int leaves = 0;
@@ -81,13 +92,14 @@ public final class SapExtractionRules {
                     if (state.hasProperty(LeavesBlock.PERSISTENT) && state.getValue(LeavesBlock.PERSISTENT)) {
                         continue;
                     }
-                    if (++leaves >= REQUIRED_LEAVES) {
-                        return true;
+                    leaves++;
+                    if (leaves >= recipe.maxLeaves()) {
+                        return leaves >= recipe.minLeaves() ? new TreeInfo(holder, root, logCount, leaves) : null;
                     }
                 }
             }
         }
-        return false;
+        return leaves >= recipe.minLeaves() ? new TreeInfo(holder, root, logCount, leaves) : null;
     }
 
     public static boolean hasContainer(Level level, BlockPos extractorPos) {

@@ -7,7 +7,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.ItemStack;
@@ -44,31 +43,58 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
             BlockKey.CODEC.optionalFieldOf("leaves", BlockKey.ofTag(BlockTags.LEAVES))
                     .forGetter(SapExtractionRecipe::leaves),
             FLUID_CODEC.fieldOf("fluid").forGetter(SapExtractionRecipe::fluid),
-            Codec.INT.optionalFieldOf("time", 10).forGetter(SapExtractionRecipe::time),
+            Codec.INT.optionalFieldOf("time", 500).forGetter(SapExtractionRecipe::time),
+            Codec.INT.optionalFieldOf("min_height", 3).forGetter(SapExtractionRecipe::minHeight),
+            Codec.INT.optionalFieldOf("max_height", 32).forGetter(SapExtractionRecipe::maxHeight),
+            Codec.INT.optionalFieldOf("min_leaves", 3).forGetter(SapExtractionRecipe::minLeaves),
+            Codec.INT.optionalFieldOf("max_leaves", 64).forGetter(SapExtractionRecipe::maxLeaves),
             Codec.INT.optionalFieldOf("priority", 0).forGetter(SapExtractionRecipe::priority)
     ).apply(instance, SapExtractionRecipe::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SapExtractionRecipe> STREAM_CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.STRING_UTF8, recipe -> recipe.log.serializeKey(),
-                    ByteBufCodecs.STRING_UTF8, recipe -> recipe.leaves.serializeKey(),
-                    FluidStack.STREAM_CODEC, SapExtractionRecipe::fluid,
-                    ByteBufCodecs.VAR_INT, SapExtractionRecipe::time,
-                    ByteBufCodecs.VAR_INT, SapExtractionRecipe::priority,
-                    (log, leaves, fluid, time, priority) -> new SapExtractionRecipe(
-                            BlockKey.parseOrAir(log), BlockKey.parseOrAir(leaves), fluid, time, priority));
+            StreamCodec.of(
+                    (buffer, recipe) -> {
+                        buffer.writeUtf(recipe.log.serializeKey());
+                        buffer.writeUtf(recipe.leaves.serializeKey());
+                        FluidStack.STREAM_CODEC.encode(buffer, recipe.fluid);
+                        buffer.writeVarInt(recipe.time);
+                        buffer.writeVarInt(recipe.minHeight);
+                        buffer.writeVarInt(recipe.maxHeight);
+                        buffer.writeVarInt(recipe.minLeaves);
+                        buffer.writeVarInt(recipe.maxLeaves);
+                        buffer.writeVarInt(recipe.priority);
+                    },
+                    buffer -> new SapExtractionRecipe(
+                            BlockKey.parseOrAir(buffer.readUtf()),
+                            BlockKey.parseOrAir(buffer.readUtf()),
+                            FluidStack.STREAM_CODEC.decode(buffer),
+                            buffer.readVarInt(),
+                            buffer.readVarInt(),
+                            buffer.readVarInt(),
+                            buffer.readVarInt(),
+                            buffer.readVarInt(),
+                            buffer.readVarInt()));
 
     private final BlockKey log;
     private final BlockKey leaves;
     private final FluidStack fluid;
     private final int time;
+    private final int minHeight;
+    private final int maxHeight;
+    private final int minLeaves;
+    private final int maxLeaves;
     private final int priority;
 
-    public SapExtractionRecipe(BlockKey log, BlockKey leaves, FluidStack fluid, int time, int priority) {
+    public SapExtractionRecipe(BlockKey log, BlockKey leaves, FluidStack fluid, int time,
+                               int minHeight, int maxHeight, int minLeaves, int maxLeaves, int priority) {
         this.log = log;
         this.leaves = leaves;
         this.fluid = fluid.copy();
         this.time = Math.max(1, time);
+        this.minHeight = Math.max(1, minHeight);
+        this.maxHeight = Math.max(this.minHeight, maxHeight);
+        this.minLeaves = Math.max(1, minLeaves);
+        this.maxLeaves = Math.max(this.minLeaves, maxLeaves);
         this.priority = priority;
     }
 
@@ -86,6 +112,22 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
 
     public int time() {
         return time;
+    }
+
+    public int minHeight() {
+        return minHeight;
+    }
+
+    public int maxHeight() {
+        return maxHeight;
+    }
+
+    public int minLeaves() {
+        return minLeaves;
+    }
+
+    public int maxLeaves() {
+        return maxLeaves;
     }
 
     public int priority() {

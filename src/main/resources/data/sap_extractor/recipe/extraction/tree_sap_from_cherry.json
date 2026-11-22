@@ -2,7 +2,14 @@
   "type": "sap_extractor:extraction",
   "log": "#minecraft:cherry_logs",
   "leaves": "minecraft:cherry_leaves",
-  "fluid": { "id": "sap_extractor:tree_sap", "amount": 1 },
-  "time": 10,
+  "fluid": {
+    "id": "sap_extractor:tree_sap",
+    "amount": 50
+  },
+  "time": 500,
+  "min_height": 3,
+  "max_height": 32,
+  "min_leaves": 3,
+  "max_leaves": 64,
   "priority": 100
 }
