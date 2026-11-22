@@ -49,7 +49,9 @@ public class FluidBasinBlockEntity extends BlockEntity {
         return tank;
     }
     public boolean hasPowderSnow() {
-        return powderSnow;
+        // 中文：方块状态 FULL + 空 tank 也视为细雪，避免方块实体重建时丢标记。
+        // English: FULL state plus an empty tank also means powder snow, so a BE rebuild cannot lose it.
+        return powderSnow || (tank.isEmpty() && getBlockState().getValue(FluidBasinBlock.FULL));
     }
     public void setPowderSnow(boolean powderSnow) {
         if (this.powderSnow == powderSnow) {
@@ -66,8 +68,11 @@ public class FluidBasinBlockEntity extends BlockEntity {
             return;
         }
         if (!powderSnow) {
+            powderSnow = hasPowderSnow();
             powderSnowHeatTicks = 0;
-            return;
+            if (!powderSnow) {
+                return;
+            }
         }
         // 只有细雪需要检查热源，普通流体不会进入下面的扫描。
         if (!hasHeatSource()) {
@@ -108,12 +113,31 @@ public class FluidBasinBlockEntity extends BlockEntity {
         if (state.is(Blocks.FURNACE) || state.is(Blocks.BLAST_FURNACE) || state.is(Blocks.SMOKER)) {
             return state.hasProperty(AbstractFurnaceBlock.LIT) && state.getValue(AbstractFurnaceBlock.LIT);
         }
+        if (isFarmerStoveLit(state)) {
+            return true;
+        }
         if (isCreateBurnerActive(state)) {
             return true;
         }
         var litBlazeBurner = BuiltInRegistries.BLOCK.get(
                 ResourceLocation.fromNamespaceAndPath("create", "lit_blaze_burner"));
         return litBlazeBurner != Blocks.AIR && state.is(litBlazeBurner);
+    }
+
+    private static boolean isFarmerStoveLit(BlockState state) {
+        var stove = BuiltInRegistries.BLOCK.get(
+                ResourceLocation.fromNamespaceAndPath("farmersdelight", "stove"));
+        if (stove == Blocks.AIR || !state.is(stove)) {
+            return false;
+        }
+        // 中文：农夫乐事炉灶有 lit 属性时只认点燃状态；没有属性时视为常热。
+        // English: Farmer's Delight stove uses lit when present; otherwise it is always hot.
+        for (var property : state.getProperties()) {
+            if (property.getName().equals("lit")) {
+                return state.getValue(property).toString().equalsIgnoreCase("true");
+            }
+        }
+        return true;
     }
 
     private static boolean isCreateBurnerActive(BlockState state) {
