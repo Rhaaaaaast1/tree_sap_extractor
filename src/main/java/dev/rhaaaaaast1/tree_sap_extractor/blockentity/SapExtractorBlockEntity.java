@@ -1,6 +1,5 @@
 package dev.rhaaaaaast1.tree_sap_extractor.blockentity;
 
-import dev.rhaaaaaast1.tree_sap_extractor.Config;
 import dev.rhaaaaaast1.tree_sap_extractor.block.SapExtractorBlock;
 import dev.rhaaaaaast1.tree_sap_extractor.recipe.SapExtractionRecipe;
 import dev.rhaaaaaast1.tree_sap_extractor.util.SapExtractionRules;
@@ -16,27 +15,18 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
 import javax.annotation.Nullable;
 
+/**
+ * Extractor without an internal fluid buffer. Each completed cycle is inserted
+ * directly into the container below.
+ */
 public class SapExtractorBlockEntity extends BlockEntity {
     private static final int REFRESH_INTERVAL = 40;
 
-    private final FluidTank tank = new FluidTank(Config.tankCapacity) {
-        @Override
-        protected void onContentsChanged() {
-            setChanged();
-        }
-
-        @Override
-        public boolean isFluidValid(FluidStack stack) {
-            return !output.isEmpty() && FluidStack.isSameFluidSameComponents(stack, output);
-        }
-    };
-
     private int progress;
-    private int cycleTime = 200;
+    private int cycleTime = 10;
     private int refreshCooldown;
     private boolean validTree;
     private boolean hasContainer;
@@ -59,8 +49,6 @@ public class SapExtractorBlockEntity extends BlockEntity {
             refreshCooldown = REFRESH_INTERVAL;
         }
 
-        pushToContainer();
-
         boolean canRun = getBlockState().getValue(SapExtractorBlock.OPEN)
                 && validTree
                 && hasContainer
@@ -68,22 +56,15 @@ public class SapExtractorBlockEntity extends BlockEntity {
                 && !output.isEmpty();
 
         working = false;
-
         if (canRun) {
-            int space = tank.fill(output, IFluidHandler.FluidAction.SIMULATE);
-            if (space < output.getAmount()) {
-                containerFull = true;
-            } else {
-                containerFull = false;
-                progress++;
-                working = true;
-                if (progress % 20 == 0) {
-                    setChanged();
-                }
-                if (progress >= cycleTime) {
-                    tank.fill(output, IFluidHandler.FluidAction.EXECUTE);
+            progress++;
+            working = true;
+            if (progress >= cycleTime) {
+                if (deliverToContainer()) {
                     progress = 0;
                     setChanged();
+                } else {
+                    working = false;
                 }
             }
         } else if (!getBlockState().getValue(SapExtractorBlock.OPEN) || !validTree || recipeId == null) {
@@ -94,6 +75,22 @@ public class SapExtractorBlockEntity extends BlockEntity {
         if (worldState.getValue(SapExtractorBlock.ACTIVE) != working) {
             level.setBlock(worldPosition, worldState.setValue(SapExtractorBlock.ACTIVE, working), 3);
         }
+    }
+
+    private boolean deliverToContainer() {
+        if (level == null) {
+            return false;
+        }
+        IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK,
+                worldPosition.below(), Direction.UP);
+        if (handler == null) {
+            hasContainer = false;
+            containerFull = false;
+            return false;
+        }
+        int filled = handler.fill(output, IFluidHandler.FluidAction.EXECUTE);
+        containerFull = filled < output.getAmount();
+        return !containerFull;
     }
 
     private void refresh() {
@@ -109,38 +106,15 @@ public class SapExtractorBlockEntity extends BlockEntity {
             recipeId = null;
             validTree = false;
             output = FluidStack.EMPTY;
-            cycleTime = 200;
+            cycleTime = 10;
         } else {
             recipeId = holder.id();
             validTree = true;
             output = holder.value().fluid().copy();
-            cycleTime = holder.value().time();
+            cycleTime = Math.max(1, holder.value().time());
         }
         hasContainer = SapExtractionRules.hasContainer(level, worldPosition);
         containerFull = false;
-    }
-
-    private void pushToContainer() {
-        if (level == null || tank.isEmpty()) {
-            return;
-        }
-        IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, worldPosition.below(), Direction.UP);
-        if (handler == null) {
-            return;
-        }
-        FluidStack simulated = tank.drain(tank.getCapacity(), IFluidHandler.FluidAction.SIMULATE);
-        int filled = handler.fill(simulated, IFluidHandler.FluidAction.EXECUTE);
-        if (filled > 0) {
-            tank.drain(filled, IFluidHandler.FluidAction.EXECUTE);
-        }
-    }
-
-    public FluidTank getTank() {
-        return tank;
-    }
-
-    public IFluidHandler getFluidHandler(@Nullable Direction side) {
-        return tank;
     }
 
     public int getProgress() {
@@ -179,7 +153,6 @@ public class SapExtractorBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        tank.writeToNBT(registries, tag);
         tag.putInt("Progress", progress);
         tag.putInt("CycleTime", cycleTime);
         if (recipeId != null) {
@@ -190,7 +163,6 @@ public class SapExtractorBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        tank.readFromNBT(registries, tag);
         progress = tag.getInt("Progress");
         cycleTime = Math.max(1, tag.getInt("CycleTime"));
         if (tag.contains("Recipe")) {

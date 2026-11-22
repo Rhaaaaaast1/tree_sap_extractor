@@ -20,9 +20,9 @@ import net.neoforged.neoforge.fluids.FluidStack;
  * models are kept empty so the side/top faces are not drawn twice.
  */
 public class FluidCauldronRenderer implements BlockEntityRenderer<FluidCauldronBlockEntity> {
-    private static final float INNER_MIN = 3.0F / 16.0F;
-    private static final float INNER_MAX = 13.0F / 16.0F;
-    private static final float BOTTOM = 4.0F / 16.0F;
+    private static final float INNER_MIN = 2.0F / 16.0F + 0.001F;
+    private static final float INNER_MAX = 14.0F / 16.0F - 0.001F;
+    private static final float BOTTOM = 4.0F / 16.0F + 0.001F;
     private static final float MIN_TOP = 6.0F / 16.0F;
     private static final float MAX_TOP = 15.0F / 16.0F;
 

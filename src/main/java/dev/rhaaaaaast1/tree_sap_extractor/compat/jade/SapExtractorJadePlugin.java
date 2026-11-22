@@ -3,11 +3,9 @@ package dev.rhaaaaaast1.tree_sap_extractor.compat.jade;
 import dev.rhaaaaaast1.tree_sap_extractor.ModRegistry;
 import dev.rhaaaaaast1.tree_sap_extractor.block.SapExtractorBlock;
 import dev.rhaaaaaast1.tree_sap_extractor.blockentity.SapExtractorBlockEntity;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.fluids.FluidStack;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.IServerDataProvider;
@@ -46,19 +44,6 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
             tag.putBoolean("HasContainer", extractor.hasContainer());
             tag.putBoolean("ContainerFull", extractor.isContainerFull());
             tag.putBoolean("Working", extractor.isWorking());
-            tag.putInt("Progress", extractor.getProgress());
-            tag.putInt("Cycle", extractor.getCycleTime());
-            tag.putInt("Amount", extractor.getTank().getFluidAmount());
-            tag.putInt("Capacity", extractor.getTank().getCapacity());
-            FluidStack tank = extractor.getTank().getFluid();
-            if (!tank.isEmpty()) {
-                tag.putString("Fluid", BuiltInRegistries.FLUID.getKey(tank.getFluid()).toString());
-            }
-            FluidStack output = extractor.getOutput();
-            if (!output.isEmpty()) {
-                tag.putString("OutputFluid", BuiltInRegistries.FLUID.getKey(output.getFluid()).toString());
-                tag.putInt("OutputAmount", output.getAmount());
-            }
         }
 
         @Override
@@ -93,7 +78,6 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
             } else {
                 status = Component.translatable("jade.sap_extractor.status.idle");
             }
-            tooltip.clear();
             tooltip.add(Component.translatable("jade.sap_extractor.status", status));
         }
 
