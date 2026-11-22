@@ -10,6 +10,10 @@ public final class ModBlockEntities {
             ModRegistry.BLOCK_ENTITIES.register("sap_extractor",
                     () -> BlockEntityType.Builder.of(SapExtractorBlockEntity::new, ModBlocks.SAP_EXTRACTOR.get()).build(null));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PrecisionCauldronBlockEntity>> PRECISION_CAULDRON =
+            ModRegistry.BLOCK_ENTITIES.register("precision_cauldron",
+                    () -> BlockEntityType.Builder.of(PrecisionCauldronBlockEntity::new, ModBlocks.PRECISION_CAULDRON.get()).build(null));
+
     private ModBlockEntities() {
     }
 

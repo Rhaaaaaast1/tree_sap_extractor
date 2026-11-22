@@ -67,6 +67,9 @@ public class SapExtractorMod {
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK,
                 ModBlockEntities.SAP_EXTRACTOR.get(),
                 (blockEntity, side) -> blockEntity.getFluidHandler(side));
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK,
+                ModBlockEntities.PRECISION_CAULDRON.get(),
+                (blockEntity, side) -> blockEntity.getTank());
     }
 
     @SubscribeEvent
