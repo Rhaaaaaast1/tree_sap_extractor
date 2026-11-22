@@ -6,7 +6,7 @@
     }
   ],
   "type": "sap_extractor:extraction",
-  "log": "#integrateddynamics:menril_logs",
+  "log": "integrateddynamics:menril_log_filled",
   "leaves": "integrateddynamics:menril_leaves",
   "fluid": {
     "id": "integrateddynamics:menril_resin",

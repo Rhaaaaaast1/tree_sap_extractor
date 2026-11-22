@@ -1,0 +1,21 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "integrateddynamics"
+    }
+  ],
+  "type": "sap_extractor:extraction",
+  "log": "integrateddynamics:menril_log",
+  "leaves": "integrateddynamics:menril_leaves",
+  "fluid": {
+    "id": "integrateddynamics:menril_resin",
+    "amount": 10
+  },
+  "time": 500,
+  "min_height": 3,
+  "max_height": 16,
+  "min_leaves": 3,
+  "max_leaves": 32,
+  "priority": 100
+}

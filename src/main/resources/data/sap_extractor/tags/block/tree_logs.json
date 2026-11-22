@@ -6,7 +6,11 @@
       "required": false
     },
     {
-      "id": "#integrateddynamics:menril_logs",
+      "id": "integrateddynamics:menril_log",
+      "required": false
+    },
+    {
+      "id": "integrateddynamics:menril_log_filled",
       "required": false
     }
   ]
