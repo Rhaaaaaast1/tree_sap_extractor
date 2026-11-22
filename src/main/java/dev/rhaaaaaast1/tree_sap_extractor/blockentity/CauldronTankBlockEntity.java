@@ -103,7 +103,9 @@ public class CauldronTankBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        tank.readFromNBT(registries, tag);
+        if (tag.contains("Fluid")) {
+            tank.readFromNBT(registries, tag);
+        }
     }
 
     @Override
