@@ -120,6 +120,7 @@ public class CauldronTankRenderer implements BlockEntityRenderer<CauldronTankBlo
         consumer.addVertex(pose, x, y, z)
                 .setColor(red, green, blue, alpha)
                 .setUv(u, v)
+                .setUv1(0, 10)
                 .setUv2(light & 0xFFFF, light >> 16)
                 .setNormal(pose, normalX, normalY, normalZ);
     }

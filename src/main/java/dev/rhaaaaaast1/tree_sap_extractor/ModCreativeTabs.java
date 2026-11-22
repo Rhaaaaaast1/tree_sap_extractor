@@ -12,7 +12,7 @@ public final class ModCreativeTabs {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB =
             ModRegistry.CREATIVE_TABS.register("sap_extractor", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.sap_extractor"))
-                    .withTabsBefore(CreativeModeTabs.OP_BLOCKS)
+                    .withTabsAfter(CreativeModeTabs.SPAWN_EGGS)
                     .icon(() -> new ItemStack(ModItems.SAP_EXTRACTOR.get()))
                     .displayItems((parameters, output) -> {
                         output.accept(ModItems.SAP_EXTRACTOR.get());
