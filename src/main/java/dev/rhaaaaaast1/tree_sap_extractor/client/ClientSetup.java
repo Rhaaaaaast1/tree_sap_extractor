@@ -36,6 +36,6 @@ public final class ClientSetup {
 
     @SubscribeEvent
     public static void registerParticles(RegisterParticleProvidersEvent event) {
-        event.registerSpriteSet(ModParticles.TINTED_HONEY.get(), TintedHoneyParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.TINTED_HONEY.get(), TintedHoneyDripParticle.Provider::new);
     }
 }

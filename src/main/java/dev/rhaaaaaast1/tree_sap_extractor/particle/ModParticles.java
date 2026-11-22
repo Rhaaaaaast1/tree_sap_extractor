@@ -10,8 +10,8 @@ public final class ModParticles {
     public static final DeferredRegister<ParticleType<?>> PARTICLES =
             DeferredRegister.create(Registries.PARTICLE_TYPE, ModRegistry.MODID);
 
-    public static final DeferredHolder<ParticleType<?>, TintedHoneyParticleType> TINTED_HONEY =
-            PARTICLES.register("tinted_honey", TintedHoneyParticleType::new);
+    public static final DeferredHolder<ParticleType<?>, TintedHoneyDripParticleType> TINTED_HONEY =
+            PARTICLES.register("tinted_honey", TintedHoneyDripParticleType::new);
 
     private ModParticles() {
     }

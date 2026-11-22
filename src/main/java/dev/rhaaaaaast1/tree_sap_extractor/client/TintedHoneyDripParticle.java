@@ -1,6 +1,6 @@
 package dev.rhaaaaaast1.tree_sap_extractor.client;
 
-import dev.rhaaaaaast1.tree_sap_extractor.particle.TintedHoneyParticleOptions;
+import dev.rhaaaaaast1.tree_sap_extractor.particle.TintedHoneyDripParticleOptions;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.DripParticle;
 import net.minecraft.client.particle.Particle;
@@ -12,8 +12,8 @@ import net.minecraft.world.level.material.Fluids;
 /**
  * Vanilla honey drip particle with the drip texture tinted by the fluid color.
  */
-public class TintedHoneyParticle extends DripParticle {
-    public TintedHoneyParticle(ClientLevel level, double x, double y, double z,
+public class TintedHoneyDripParticle extends DripParticle {
+    public TintedHoneyDripParticle(ClientLevel level, double x, double y, double z,
                                TextureAtlasSprite sprite, int color) {
         super(level, x, y, z, Fluids.EMPTY);
         this.gravity = 0.01F;
@@ -25,7 +25,7 @@ public class TintedHoneyParticle extends DripParticle {
                 (color & 0xFF) / 255.0F);
     }
 
-    public static class Provider implements ParticleProvider<TintedHoneyParticleOptions> {
+    public static class Provider implements ParticleProvider<TintedHoneyDripParticleOptions> {
         private final SpriteSet sprites;
 
         public Provider(SpriteSet sprites) {
@@ -33,10 +33,10 @@ public class TintedHoneyParticle extends DripParticle {
         }
 
         @Override
-        public Particle createParticle(TintedHoneyParticleOptions options, ClientLevel level,
+        public Particle createParticle(TintedHoneyDripParticleOptions options, ClientLevel level,
                                        double x, double y, double z,
                                        double xSpeed, double ySpeed, double zSpeed) {
-            return new TintedHoneyParticle(level, x, y, z, sprites.get(level.random), options.color());
+            return new TintedHoneyDripParticle(level, x, y, z, sprites.get(level.random), options.color());
         }
     }
 }
