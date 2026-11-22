@@ -7,6 +7,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
@@ -102,6 +105,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
         BlockPos trunkPos = worldPosition.relative(facing.getOpposite());
 
         RecipeHolder<SapExtractionRecipe> holder = SapExtractionRules.findRecipe(level, trunkPos);
+        FluidStack previous = output;
         if (holder == null) {
             recipeId = null;
             validTree = false;
@@ -112,6 +116,11 @@ public class SapExtractorBlockEntity extends BlockEntity {
             validTree = true;
             output = holder.value().fluid().copy();
             cycleTime = Math.max(1, holder.value().time());
+        }
+        if (!FluidStack.isSameFluidSameComponents(previous, output)
+                || previous.getAmount() != output.getAmount()) {
+            setChanged();
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
         hasContainer = SapExtractionRules.hasContainer(level, worldPosition);
         containerFull = false;
@@ -158,6 +167,9 @@ public class SapExtractorBlockEntity extends BlockEntity {
         if (recipeId != null) {
             tag.putString("Recipe", recipeId.toString());
         }
+        if (!output.isEmpty()) {
+            tag.put("Output", output.save(registries));
+        }
     }
 
     @Override
@@ -168,5 +180,16 @@ public class SapExtractorBlockEntity extends BlockEntity {
         if (tag.contains("Recipe")) {
             recipeId = ResourceLocation.tryParse(tag.getString("Recipe"));
         }
+        output = FluidStack.parseOptional(registries, tag.getCompound("Output"));
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return saveWithoutMetadata(registries);
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 }

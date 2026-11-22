@@ -1,6 +1,7 @@
 package dev.rhaaaaaast1.tree_sap_extractor.block;
 
 import com.mojang.serialization.MapCodec;
+import dev.rhaaaaaast1.tree_sap_extractor.Config;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -79,6 +80,9 @@ public class RubberSaplingBlock extends BushBlock implements BonemealableBlock {
     }
 
     private void advance(ServerLevel level, BlockPos pos, BlockState state, RandomSource random) {
+        if (!Config.allowRubberWoodGeneration) {
+            return;
+        }
         if (state.getValue(STAGE) == 0) {
             level.setBlock(pos, state.setValue(STAGE, 1), Block.UPDATE_ALL);
             return;

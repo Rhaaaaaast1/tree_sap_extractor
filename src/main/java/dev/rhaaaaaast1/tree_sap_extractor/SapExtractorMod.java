@@ -5,6 +5,7 @@ import dev.rhaaaaaast1.tree_sap_extractor.block.ModBlocks;
 import dev.rhaaaaaast1.tree_sap_extractor.blockentity.ModBlockEntities;
 import dev.rhaaaaaast1.tree_sap_extractor.fluid.ModFluids;
 import dev.rhaaaaaast1.tree_sap_extractor.item.ModItems;
+import dev.rhaaaaaast1.tree_sap_extractor.particle.ModParticles;
 import dev.rhaaaaaast1.tree_sap_extractor.recipe.ModRecipes;
 import dev.rhaaaaaast1.tree_sap_extractor.util.RubberRecipeFilter;
 import dev.rhaaaaaast1.tree_sap_extractor.worldgen.ModFeatures;
@@ -41,6 +42,7 @@ public class SapExtractorMod {
         ModDataComponents.init();
         ModCreativeTabs.init();
         ModFeatures.FEATURES.register(modEventBus);
+        ModParticles.PARTICLES.register(modEventBus);
 
         ModRegistry.FLUID_TYPES.register(modEventBus);
         ModRegistry.FLUIDS.register(modEventBus);

@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "sap_extractor:fluid_cauldron"
+          "name": "sap_extractor:fluid_basin"
         }
       ],
       "conditions": [

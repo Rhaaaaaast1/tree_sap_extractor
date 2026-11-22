@@ -4,6 +4,6 @@
       "id": "create:basin",
       "required": false
     },
-    "sap_extractor:fluid_cauldron"
+    "sap_extractor:fluid_basin"
   ]
 }

@@ -30,7 +30,7 @@ public final class ModBlocks {
     public static final DeferredBlock<SapExtractorBlock> SAP_EXTRACTOR =
             ModRegistry.BLOCKS.register("sap_extractor", () -> new SapExtractorBlock(extractorProperties()));
     public static final DeferredBlock<FluidCauldronBlock> FLUID_CAULDRON =
-            ModRegistry.BLOCKS.register("fluid_cauldron", () -> new FluidCauldronBlock(cauldronProperties()));
+            ModRegistry.BLOCKS.register("fluid_basin", () -> new FluidCauldronBlock(cauldronProperties()));
 
     public static final DeferredBlock<RotatedPillarBlock> RUBBER_LOG =
             ModRegistry.BLOCKS.register("rubber_log", () -> new RotatedPillarBlock(woodProperties()));

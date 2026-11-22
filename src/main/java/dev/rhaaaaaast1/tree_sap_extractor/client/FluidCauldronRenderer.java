@@ -22,9 +22,9 @@ import net.neoforged.neoforge.fluids.FluidStack;
 public class FluidCauldronRenderer implements BlockEntityRenderer<FluidCauldronBlockEntity> {
     private static final float INNER_MIN = 2.0F / 16.0F + 0.001F;
     private static final float INNER_MAX = 14.0F / 16.0F - 0.001F;
-    private static final float BOTTOM = 4.0F / 16.0F + 0.001F;
-    private static final float MIN_TOP = 6.0F / 16.0F;
-    private static final float MAX_TOP = 15.0F / 16.0F;
+    private static final float BOTTOM = 2.0F / 16.0F + 0.001F;
+    private static final float MIN_TOP = 2.5F / 16.0F;
+    private static final float MAX_TOP = 14.999F / 16.0F;
 
     public FluidCauldronRenderer(BlockEntityRendererProvider.Context context) {
     }
