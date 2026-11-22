@@ -1,7 +1,6 @@
 {
   "values": [
     "sap_extractor:sap_extractor",
-    "sap_extractor:precision_cauldron",
     "sap_extractor:vulcanized_rubber_block"
   ]
 }

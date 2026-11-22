@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "dev.rhaaaaaast1.tree_sap_extractor.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "AbstractCauldronBlockMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
