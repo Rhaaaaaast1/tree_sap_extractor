@@ -151,22 +151,24 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return switch (state.getValue(FACING)) {
+        VoxelShape shape = switch (state.getValue(FACING)) {
             case EAST -> SELECTION_EAST;
             case SOUTH -> SELECTION_SOUTH;
             case WEST -> SELECTION_WEST;
             default -> SELECTION_NORTH;
         };
+        return shape.isEmpty() ? Shapes.block() : shape;
     }
 
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return switch (state.getValue(FACING)) {
+        VoxelShape shape = switch (state.getValue(FACING)) {
             case EAST -> SHAPE_EAST;
             case SOUTH -> SHAPE_SOUTH;
             case WEST -> SHAPE_WEST;
             default -> SHAPE_NORTH;
         };
+        return shape.isEmpty() ? Shapes.block() : shape;
     }
 
     @Override

@@ -18,7 +18,6 @@ import snownee.jade.api.IWailaCommonRegistration;
 import snownee.jade.api.IWailaPlugin;
 import snownee.jade.api.WailaPlugin;
 import snownee.jade.api.config.IPluginConfig;
-import snownee.jade.api.ui.IElementHelper;
 
 @WailaPlugin
 public class SapExtractorJadePlugin implements IWailaPlugin {
@@ -100,7 +99,7 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
             int cycle = data.getInt("Cycle");
             int progress = data.getInt("Progress");
             if (open && validTree && hasContainer && !full && cycle > 0) {
-                tooltip.add(IElementHelper.get().progress(Math.min(1.0F, progress / (float) cycle)));
+                tooltip.add(Component.translatable("jade.sap_extractor.progress", progress, cycle));
             }
 
             String fluidId = data.getString("Fluid");

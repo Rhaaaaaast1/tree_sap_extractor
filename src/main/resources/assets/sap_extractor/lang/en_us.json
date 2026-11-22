@@ -38,6 +38,7 @@
   "jade.sap_extractor.status.idle": "Idle",
   "jade.sap_extractor.tank": "Tank: %s %s / %s mB",
   "jade.sap_extractor.output": "Produces: %s (%s mB per cycle)",
+  "jade.sap_extractor.progress": "Progress: %s / %s ticks",
   "config.jade.plugin_sap_extractor.sap_extractor": "Tree Sap Extractor",
   "jei.sap_extractor.extraction": "Tree Sap Extraction"
 }

@@ -10,7 +10,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 
 public final class ModCreativeTabs {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB =
-            ModRegistry.CREATIVE_TABS.register("sap_extractor", () -> CreativeModeTab.builder()
+            ModRegistry.CREATIVE_TABS.register("sap_extractor", () -> CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 0)
                     .title(Component.translatable("itemGroup.sap_extractor"))
                     .withTabsAfter(CreativeModeTabs.SPAWN_EGGS)
                     .icon(() -> new ItemStack(ModItems.SAP_EXTRACTOR.get()))

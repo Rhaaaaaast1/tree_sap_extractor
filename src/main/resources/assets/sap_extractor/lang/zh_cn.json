@@ -38,6 +38,7 @@
   "jade.sap_extractor.status.idle": "待机",
   "jade.sap_extractor.tank": "储罐：%s %s / %s mB",
   "jade.sap_extractor.output": "产出：%s（每周期 %s mB）",
+  "jade.sap_extractor.progress": "进度：%s / %s tick",
   "config.jade.plugin_sap_extractor.sap_extractor": "树液采集器",
   "jei.sap_extractor.extraction": "树液采集"
 }
