@@ -26,10 +26,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.Fluids;
@@ -87,11 +84,10 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
         }
         FluidStack fluid = basin.getTank().getFluid();
         if (basin.hasPowderSnow()) {
-            entity.setTicksFrozen(140);
+            // 中文：像原版细雪一样逐 tick 增加冻结值，不要直接设满。
+            // English: Increase frozen ticks gradually like vanilla powder snow instead of maxing it instantly.
+            entity.setTicksFrozen(Math.min(140, entity.getTicksFrozen() + 1));
             entity.setIsInPowderSnow(true);
-            if (entity instanceof LivingEntity living) {
-                living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 1, false, false, false));
-            }
             return;
         }
         if (fluid.getAmount() <= 0) {

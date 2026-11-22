@@ -37,7 +37,10 @@ public class FluidBasinRenderer implements BlockEntityRenderer<FluidBasinBlockEn
     public void render(FluidBasinBlockEntity cauldron, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight, int packedOverlay) {
         FluidStack fluid = cauldron.getTank().getFluid();
-        boolean powderSnow = cauldron.hasPowderSnow();
+        // 中文：客户端标记偶尔会晚到；空 tank + FULL 状态也视作细雪。
+        // English: The client flag can arrive late; an empty tank with FULL state is also powder snow.
+        boolean powderSnow = cauldron.hasPowderSnow()
+                || (fluid.isEmpty() && cauldron.getBlockState().getValue(dev.rhaaaaaast1.tree_sap_extractor.block.FluidBasinBlock.FULL));
         if (!powderSnow && fluid.isEmpty()) {
             return;
         }

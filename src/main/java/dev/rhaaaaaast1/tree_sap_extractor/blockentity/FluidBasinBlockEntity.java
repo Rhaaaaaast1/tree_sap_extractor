@@ -8,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -92,6 +93,8 @@ public class FluidBasinBlockEntity extends BlockEntity {
         return false;
     }
     private static boolean isHeatSource(BlockState state) {
+        // 中文：先处理原版热源，再兼容 Create 的两种烈焰人燃烧室状态。
+        // English: Handle vanilla heat sources first, then both Create blaze burner forms.
         if (state.is(Blocks.CAMPFIRE) || state.is(Blocks.SOUL_CAMPFIRE)) {
             return state.hasProperty(CampfireBlock.LIT) && state.getValue(CampfireBlock.LIT);
         }
@@ -105,9 +108,25 @@ public class FluidBasinBlockEntity extends BlockEntity {
         if (state.is(Blocks.FURNACE) || state.is(Blocks.BLAST_FURNACE) || state.is(Blocks.SMOKER)) {
             return state.hasProperty(AbstractFurnaceBlock.LIT) && state.getValue(AbstractFurnaceBlock.LIT);
         }
+        if (isCreateBurnerActive(state)) {
+            return true;
+        }
         var litBlazeBurner = BuiltInRegistries.BLOCK.get(
                 ResourceLocation.fromNamespaceAndPath("create", "lit_blaze_burner"));
         return litBlazeBurner != Blocks.AIR && state.is(litBlazeBurner);
+    }
+
+    private static boolean isCreateBurnerActive(BlockState state) {
+        // 中文：烈焰人燃烧室有 heat_level 时，只有 kindled/seething 才算工作。
+        // English: A blaze burner with heat_level is active only when kindled/seething.
+        for (var property : state.getProperties()) {
+            if (!property.getName().equals("heat_level")) {
+                continue;
+            }
+            String value = state.getValue(property).toString();
+            return value.equalsIgnoreCase("kindled") || value.equalsIgnoreCase("seething");
+        }
+        return false;
     }
     private void meltPowderSnow() {
         // 细雪不是流体，所以这里直接把内容换成 1000 mB 水，再让 BER 画水。
@@ -163,5 +182,15 @@ public class FluidBasinBlockEntity extends BlockEntity {
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet,
+                             HolderLookup.Provider registries) {
+        // 中文：显式加载同步数据，确保细雪标记和 tank 在客户端被清空/恢复。
+        // English: Explicitly load synced data so the client clears/restores powder snow and tank state.
+        if (packet.getTag() != null) {
+            loadWithComponents(packet.getTag(), registries);
+        }
     }
 }
