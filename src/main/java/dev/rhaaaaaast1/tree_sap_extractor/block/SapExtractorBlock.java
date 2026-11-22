@@ -57,7 +57,7 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
         return Shapes.or(
                 rotatedBox(facing, 5.44, 8.8, 14.08, 10.56, 12.64, 16.0),
                 rotatedBox(facing, 6.72, 9.44, 9.6, 9.28, 12.0, 14.08),
-                rotatedBox(facing, 5.92, 12.0, 10.56, 10.08, 14.4, 13.28),
+                rotatedBox(facing, 5.92, 12.0, 9.12, 10.08, 14.4, 13.28),
                 rotatedBox(facing, 6.88, 8.0, 6.88, 9.12, 11.36, 9.6)
         );
     }
@@ -101,7 +101,7 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
         if (!context.getLevel().getBlockState(trunkPos).is(ModTags.Blocks.TREE_LOGS)) {
             return null;
         }
-        return defaultBlockState().setValue(FACING, face).setValue(OPEN, true).setValue(ACTIVE, false);
+        return defaultBlockState().setValue(FACING, face).setValue(OPEN, false).setValue(ACTIVE, false);
     }
 
     @Override
