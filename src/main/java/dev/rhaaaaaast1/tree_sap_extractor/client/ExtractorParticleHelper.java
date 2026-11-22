@@ -1,7 +1,7 @@
 package dev.rhaaaaaast1.tree_sap_extractor.client;
 
 import dev.rhaaaaaast1.tree_sap_extractor.fluid.ModFluids;
-import net.minecraft.client.Minecraft;
+import dev.rhaaaaaast1.tree_sap_extractor.particle.TintedHoneyParticleOptions;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
@@ -32,10 +32,5 @@ public final class ExtractorParticleHelper {
         double x = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.05;
         double y = pos.getY() + 0.45;
         double z = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.05;
-        Minecraft.getInstance().particleEngine.add(new TintedHoneyParticle(
-                clientLevel, x, y, z,
-                ((tint >> 16) & 0xFF) / 255.0F,
-                ((tint >> 8) & 0xFF) / 255.0F,
-                (tint & 0xFF) / 255.0F));
-    }
+        clientLevel.addParticle(new TintedHoneyParticleOptions(tint), x, y, z, 0.0, -0.015, 0.0);    }
 }

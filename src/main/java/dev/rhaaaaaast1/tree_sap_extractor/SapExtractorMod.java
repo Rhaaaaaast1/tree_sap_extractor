@@ -5,6 +5,7 @@ import dev.rhaaaaaast1.tree_sap_extractor.block.ModBlocks;
 import dev.rhaaaaaast1.tree_sap_extractor.blockentity.ModBlockEntities;
 import dev.rhaaaaaast1.tree_sap_extractor.fluid.ModFluids;
 import dev.rhaaaaaast1.tree_sap_extractor.item.ModItems;
+import dev.rhaaaaaast1.tree_sap_extractor.particle.ModParticles;
 import dev.rhaaaaaast1.tree_sap_extractor.recipe.ModRecipes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -33,6 +34,7 @@ public class SapExtractorMod {
         ModRecipes.init();
         ModDataComponents.init();
         ModCreativeTabs.init();
+        ModParticles.PARTICLES.register(modEventBus);
 
         ModRegistry.FLUID_TYPES.register(modEventBus);
         ModRegistry.FLUIDS.register(modEventBus);
