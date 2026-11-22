@@ -9,29 +9,19 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 public final class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    private static final ModConfigSpec.BooleanValue REQUIRE_TREE_STRUCTURE = BUILDER
-            .comment("Require a real tree (soil below the root, at least 3 matching natural leaves) instead of accepting any matching placed log.")
-            .define("requireTreeStructure", true);
-    private static final ModConfigSpec.IntValue REQUIRED_LEAVES = BUILDER
-            .comment("Number of natural (persistent=false) matching leaves required around the trunk.")
-            .defineInRange("requiredNaturalLeaves", 3, 1, 64);
-    private static final ModConfigSpec.IntValue TANK_CAPACITY = BUILDER
-            .comment("Internal extractor tank capacity in mB. Output is pushed into the container below every tick.")
-            .defineInRange("tankCapacity", 1000, 250, 16000);
+    private static final ModConfigSpec.BooleanValue ALLOW_RUBBER_WOOD_GENERATION = BUILDER
+            .comment("Allow rubber trees to generate naturally in jungle biomes. When false, rubber wood items are hidden from the creative tab and their recipes are removed; only /give can create them.")
+            .define("allowRubberWoodGeneration", true);
 
     public static final ModConfigSpec SPEC = BUILDER.build();
 
-    public static boolean requireTreeStructure = true;
-    public static int requiredLeaves = 3;
-    public static int tankCapacity = 1000;
+    public static boolean allowRubberWoodGeneration = true;
 
     private Config() {
     }
 
     @SubscribeEvent
     static void onLoad(ModConfigEvent event) {
-        requireTreeStructure = REQUIRE_TREE_STRUCTURE.get();
-        requiredLeaves = REQUIRED_LEAVES.get();
-        tankCapacity = TANK_CAPACITY.get();
+        allowRubberWoodGeneration = ALLOW_RUBBER_WOOD_GENERATION.get();
     }
 }

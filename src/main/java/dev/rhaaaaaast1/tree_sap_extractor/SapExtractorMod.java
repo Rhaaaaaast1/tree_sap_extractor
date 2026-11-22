@@ -6,6 +6,8 @@ import dev.rhaaaaaast1.tree_sap_extractor.blockentity.ModBlockEntities;
 import dev.rhaaaaaast1.tree_sap_extractor.fluid.ModFluids;
 import dev.rhaaaaaast1.tree_sap_extractor.item.ModItems;
 import dev.rhaaaaaast1.tree_sap_extractor.recipe.ModRecipes;
+import dev.rhaaaaaast1.tree_sap_extractor.util.RubberRecipeFilter;
+import dev.rhaaaaaast1.tree_sap_extractor.worldgen.ModFeatures;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -21,6 +23,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.slf4j.Logger;
 
@@ -37,6 +40,7 @@ public class SapExtractorMod {
         ModRecipes.init();
         ModDataComponents.init();
         ModCreativeTabs.init();
+        ModFeatures.FEATURES.register(modEventBus);
 
         ModRegistry.FLUID_TYPES.register(modEventBus);
         ModRegistry.FLUIDS.register(modEventBus);
@@ -67,6 +71,11 @@ public class SapExtractorMod {
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK,
                 ModBlockEntities.FLUID_CAULDRON.get(),
                 (blockEntity, side) -> blockEntity.getTank());
+    }
+
+    @SubscribeEvent
+    public void onAddReloadListener(AddReloadListenerEvent event) {
+        event.addListener(new RubberRecipeFilter(event.getServerResources()));
     }
 
     @SubscribeEvent

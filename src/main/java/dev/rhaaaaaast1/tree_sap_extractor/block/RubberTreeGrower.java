@@ -3,7 +3,7 @@ package dev.rhaaaaaast1.tree_sap_extractor.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -12,7 +12,7 @@ public final class RubberTreeGrower {
     private RubberTreeGrower() {
     }
 
-    public static boolean grow(Level level, BlockPos saplingPos, RandomSource random) {
+    public static boolean grow(LevelAccessor level, BlockPos saplingPos, RandomSource random) {
         BlockPos base = saplingPos;
         if (!level.getBlockState(base.below()).is(BlockTags.DIRT)) {
             return false;
@@ -44,7 +44,7 @@ public final class RubberTreeGrower {
         return true;
     }
 
-    private static void placeLayer(Level level, int cx, int y, int cz, int radius, RandomSource random,
+    private static void placeLayer(LevelAccessor level, int cx, int y, int cz, int radius, RandomSource random,
                                    BlockState leaves, boolean trimCorners) {
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {

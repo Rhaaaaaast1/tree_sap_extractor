@@ -17,22 +17,24 @@ public final class ModCreativeTabs {
                     .displayItems((parameters, output) -> {
                         output.accept(ModItems.SAP_EXTRACTOR.get());
                         output.accept(ModItems.FLUID_CAULDRON.get());
-                        output.accept(ModItems.RUBBER_SAPLING.get());
-                        output.accept(ModItems.RUBBER_LOG.get());
-                        output.accept(ModItems.RUBBER_WOOD.get());
-                        output.accept(ModItems.STRIPPED_RUBBER_LOG.get());
-                        output.accept(ModItems.STRIPPED_RUBBER_WOOD.get());
-                        output.accept(ModItems.TAPPED_RUBBER_LOG.get());
-                        output.accept(ModItems.RUBBER_PLANKS.get());
-                        output.accept(ModItems.RUBBER_STAIRS.get());
-                        output.accept(ModItems.RUBBER_SLAB.get());
-                        output.accept(ModItems.RUBBER_FENCE.get());
-                        output.accept(ModItems.RUBBER_FENCE_GATE.get());
-                        output.accept(ModItems.RUBBER_DOOR.get());
-                        output.accept(ModItems.RUBBER_TRAPDOOR.get());
-                        output.accept(ModItems.RUBBER_BUTTON.get());
-                        output.accept(ModItems.RUBBER_PRESSURE_PLATE.get());
-                        output.accept(ModItems.RUBBER_LEAVES.get());
+                        if (Config.allowRubberWoodGeneration) {
+                            output.accept(ModItems.RUBBER_SAPLING.get());
+                            output.accept(ModItems.RUBBER_LOG.get());
+                            output.accept(ModItems.RUBBER_WOOD.get());
+                            output.accept(ModItems.STRIPPED_RUBBER_LOG.get());
+                            output.accept(ModItems.STRIPPED_RUBBER_WOOD.get());
+                            output.accept(ModItems.TAPPED_RUBBER_LOG.get());
+                            output.accept(ModItems.RUBBER_PLANKS.get());
+                            output.accept(ModItems.RUBBER_STAIRS.get());
+                            output.accept(ModItems.RUBBER_SLAB.get());
+                            output.accept(ModItems.RUBBER_FENCE.get());
+                            output.accept(ModItems.RUBBER_FENCE_GATE.get());
+                            output.accept(ModItems.RUBBER_DOOR.get());
+                            output.accept(ModItems.RUBBER_TRAPDOOR.get());
+                            output.accept(ModItems.RUBBER_BUTTON.get());
+                            output.accept(ModItems.RUBBER_PRESSURE_PLATE.get());
+                            output.accept(ModItems.RUBBER_LEAVES.get());
+                        }
                         output.accept(ModItems.RUBBER_BLOCK.get());
                         output.accept(ModItems.VULCANIZED_RUBBER_BLOCK.get());
                         output.accept(ModItems.RUBBER.get());

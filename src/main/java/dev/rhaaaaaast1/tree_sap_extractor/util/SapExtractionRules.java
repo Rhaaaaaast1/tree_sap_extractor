@@ -1,6 +1,5 @@
 package dev.rhaaaaaast1.tree_sap_extractor.util;
 
-import dev.rhaaaaaast1.tree_sap_extractor.Config;
 import dev.rhaaaaaast1.tree_sap_extractor.recipe.ModRecipes;
 import dev.rhaaaaaast1.tree_sap_extractor.recipe.SapExtractionRecipe;
 import net.minecraft.core.BlockPos;
@@ -24,6 +23,8 @@ import java.util.List;
  * order so a mismatched high-priority recipe does not hide a valid fallback.
  */
 public final class SapExtractionRules {
+    private static final int REQUIRED_LEAVES = 3;
+
     private SapExtractionRules() {
     }
 
@@ -49,10 +50,6 @@ public final class SapExtractionRules {
     }
 
     public static boolean isValidTree(Level level, BlockPos attachedLog, SapExtractionRecipe recipe) {
-        if (!Config.requireTreeStructure) {
-            return recipe.log().matches(level.getBlockState(attachedLog));
-        }
-
         BlockPos root = null;
         for (int down = 0; down <= 3; down++) {
             BlockPos candidate = attachedLog.below(down);
@@ -84,7 +81,7 @@ public final class SapExtractionRules {
                     if (state.hasProperty(LeavesBlock.PERSISTENT) && state.getValue(LeavesBlock.PERSISTENT)) {
                         continue;
                     }
-                    if (++leaves >= Config.requiredLeaves) {
+                    if (++leaves >= REQUIRED_LEAVES) {
                         return true;
                     }
                 }

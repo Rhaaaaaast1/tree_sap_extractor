@@ -6,6 +6,6 @@
     "id": "sap_extractor:latex",
     "amount": 1
   },
-  "time": 10,
+  "time": 5,
   "priority": 100
 }
