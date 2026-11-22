@@ -45,6 +45,7 @@ import javax.annotation.Nullable;
 public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBlock {
     public static final MapCodec<FluidBasinBlock> CODEC = simpleCodec(FluidBasinBlock::new);
     public static final BooleanProperty FULL = BooleanProperty.create("full");
+    public static final BooleanProperty POWDER_SNOW = BooleanProperty.create("powder_snow");
     private static final int BOTTLE_AMOUNT = 250;
     private static final VoxelShape SHAPE = Shapes.or(
             Block.box(0, 2, 0, 2, 16, 16),
@@ -55,11 +56,11 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
     );
     public FluidBasinBlock(Properties properties) {
         super(properties, CauldronInteraction.EMPTY);
-        registerDefaultState(stateDefinition.any().setValue(FULL, false));
+        registerDefaultState(stateDefinition.any().setValue(FULL, false).setValue(POWDER_SNOW, false));
     }
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FULL);
+        builder.add(FULL, POWDER_SNOW);
     }
     @Override
     protected MapCodec<? extends AbstractCauldronBlock> codec() {
@@ -115,6 +116,23 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
             level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 0.4F, 1.0F);
         }
     }
+    @Override
+    protected boolean canReceiveStalactiteDrip(net.minecraft.world.level.material.Fluid fluid) {
+        // 中文：钟乳石滴下的水和熔岩都可以进入真实 tank。
+        // English: Water and lava from a pointed dripstone can enter the real tank.
+        return fluid.isSame(Fluids.WATER) || fluid.isSame(Fluids.LAVA);
+    }
+
+    @Override
+    protected void receiveStalactiteDrip(BlockState state, Level level, BlockPos pos,
+                                          net.minecraft.world.level.material.Fluid fluid) {
+        // 中文：一次滴落补充 1000 mB，满 tank 时由 FluidTank 自行拒绝。
+        // English: A drip adds 1000 mB; a full tank rejects it through FluidTank.
+        if (level.getBlockEntity(pos) instanceof FluidBasinBlockEntity basin) {
+            basin.getTank().fill(new FluidStack(fluid, basin.getTank().getCapacity()), IFluidHandler.FluidAction.EXECUTE);
+        }
+    }
+
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {

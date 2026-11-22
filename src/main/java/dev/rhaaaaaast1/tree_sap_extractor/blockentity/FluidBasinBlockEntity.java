@@ -49,9 +49,11 @@ public class FluidBasinBlockEntity extends BlockEntity {
         return tank;
     }
     public boolean hasPowderSnow() {
-        // 中文：方块状态 FULL + 空 tank 也视为细雪，避免方块实体重建时丢标记。
-        // English: FULL state plus an empty tank also means powder snow, so a BE rebuild cannot lose it.
-        return powderSnow || (tank.isEmpty() && getBlockState().getValue(FluidBasinBlock.FULL));
+        // 中文：方块状态和空 tank 都可作为细雪兜底，避免实体重建或同步延迟导致显示为空。
+        // English: Block state and empty-tank fallback survive BE rebuilds and late sync.
+        return powderSnow
+                || getBlockState().getValue(FluidBasinBlock.POWDER_SNOW)
+                || (tank.isEmpty() && getBlockState().getValue(FluidBasinBlock.FULL));
     }
     public void setPowderSnow(boolean powderSnow) {
         if (this.powderSnow == powderSnow) {
@@ -119,6 +121,13 @@ public class FluidBasinBlockEntity extends BlockEntity {
         if (isCreateBurnerActive(state)) {
             return true;
         }
+        var blazeBurner = BuiltInRegistries.BLOCK.get(
+                ResourceLocation.fromNamespaceAndPath("create", "blaze_burner"));
+        if (blazeBurner != Blocks.AIR && state.is(blazeBurner)) {
+            // 中文：兼容部分 Create 版本只有燃烧室方块实体、状态里没有 heat_level 的情况。
+            // English: Compatibility for Create versions that keep activity only in the block entity.
+            return true;
+        }
         var litBlazeBurner = BuiltInRegistries.BLOCK.get(
                 ResourceLocation.fromNamespaceAndPath("create", "lit_blaze_burner"));
         return litBlazeBurner != Blocks.AIR && state.is(litBlazeBurner);
@@ -175,8 +184,10 @@ public class FluidBasinBlockEntity extends BlockEntity {
             return;
         }
         boolean full = powderSnow || tank.getFluidAmount() >= tank.getCapacity();
-        if (state.getValue(FluidBasinBlock.FULL) != full) {
-            level.setBlock(worldPosition, state.setValue(FluidBasinBlock.FULL, full), 3);
+        BlockState target = state.setValue(FluidBasinBlock.FULL, full)
+                .setValue(FluidBasinBlock.POWDER_SNOW, powderSnow);
+        if (!target.equals(state)) {
+            level.setBlock(worldPosition, target, 3);
         }
     }
     private void syncToClient() {

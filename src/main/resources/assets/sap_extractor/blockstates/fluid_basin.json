@@ -1,9 +1,15 @@
 {
   "variants": {
-    "full=false": {
+    "full=false,powder_snow=false": {
       "model": "sap_extractor:block/cauldron_container"
     },
-    "full=true": {
+    "full=false,powder_snow=true": {
+      "model": "sap_extractor:block/cauldron_container"
+    },
+    "full=true,powder_snow=false": {
+      "model": "sap_extractor:block/cauldron_container"
+    },
+    "full=true,powder_snow=true": {
       "model": "sap_extractor:block/cauldron_container"
     }
   }
