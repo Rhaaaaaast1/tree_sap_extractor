@@ -24,7 +24,7 @@ public class ExtractionRecipeCategory extends AbstractRecipeCategory<SapExtracti
         super(TYPE,
                 Component.translatable("jei.sap_extractor.extraction"),
                 helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(ModItems.SAP_EXTRACTOR.get())),
-                120, 50);
+                120, 72);
     }
 
     @Override
@@ -32,10 +32,13 @@ public class ExtractionRecipeCategory extends AbstractRecipeCategory<SapExtracti
         ItemStack leaf = firstStack(recipe.leaves().blocks().toList());
         ItemStack log = firstStack(recipe.log().blocks().toList());
 
-        builder.addInputSlot(8, 17).addItemStack(leaf);
-        builder.addInputSlot(30, 17).addItemStack(log);
+        builder.addInputSlot(8, 8).addItemStack(leaf);
+        builder.addInputSlot(28, 8).addItemStack(leaf);
+        builder.addInputSlot(48, 8).addItemStack(leaf);
+        builder.addInputSlot(28, 28).addItemStack(log);
+        builder.addInputSlot(28, 48).addItemStack(log);
 
-        builder.addOutputSlot(88, 17)
+        builder.addOutputSlot(88, 28)
                 .addFluidStack(recipe.fluid().getFluid(), recipe.fluid().getAmount())
                 .setCustomRenderer(NeoForgeTypes.FLUID_STACK, FluidIconRenderer.INSTANCE);
     }
