@@ -28,6 +28,9 @@ public class CauldronTankBlockEntity extends BlockEntity {
         @Override
         protected void onContentsChanged() {
             setChanged();
+            if (level != null && !level.isClientSide) {
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            }
         }
     };
 
@@ -51,18 +54,8 @@ public class CauldronTankBlockEntity extends BlockEntity {
     }
 
     private void updateVanillaState() {
-        FluidStack fluid = tank.getFluid();
         BlockState current = getBlockState();
-        BlockState target;
-        if (fluid.is(Fluids.WATER)) {
-            int level = amountToLevel(fluid.getAmount());
-            target = Blocks.WATER_CAULDRON.defaultBlockState()
-                    .setValue(LayeredCauldronBlock.LEVEL, level);
-        } else if (fluid.is(Fluids.LAVA)) {
-            target = Blocks.LAVA_CAULDRON.defaultBlockState();
-        } else {
-            target = Blocks.CAULDRON.defaultBlockState();
-        }
+        BlockState target = Blocks.CAULDRON.defaultBlockState();
         if (target.equals(current)) {
             return;
         }
@@ -71,13 +64,6 @@ public class CauldronTankBlockEntity extends BlockEntity {
         if (level.getBlockEntity(worldPosition) instanceof CauldronTankBlockEntity replacement) {
             replacement.loadWithComponents(tankData, level.registryAccess());
         }
-    }
-
-    private static int amountToLevel(int amount) {
-        if (amount <= 0) {
-            return 0;
-        }
-        return Math.min(3, Math.max(1, (amount * 3 + CAPACITY - 1) / CAPACITY));
     }
 
     private void seedFromBlockState() {

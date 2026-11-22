@@ -2,6 +2,7 @@ package dev.rhaaaaaast1.tree_sap_extractor.client;
 
 import dev.rhaaaaaast1.tree_sap_extractor.ModRegistry;
 import dev.rhaaaaaast1.tree_sap_extractor.block.ModBlocks;
+import dev.rhaaaaaast1.tree_sap_extractor.blockentity.ModBlockEntities;
 import dev.rhaaaaaast1.tree_sap_extractor.fluid.ModFluids;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -9,6 +10,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 @EventBusSubscriber(modid = ModRegistry.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class ClientSetup {
@@ -28,5 +30,10 @@ public final class ClientSetup {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.RUBBER_TRAPDOOR.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.SAP_EXTRACTOR.get(), RenderType.cutout());
         });
+    }
+
+    @SubscribeEvent
+    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(ModBlockEntities.CAULDRON_TANK.get(), CauldronTankRenderer::new);
     }
 }
