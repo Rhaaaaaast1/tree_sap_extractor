@@ -48,6 +48,7 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
     public static final BooleanProperty POWDER_SNOW = BooleanProperty.create("powder_snow");
     private static final int BOTTLE_AMOUNT = 250;
     private static final int DRIP_AMOUNT = 5;
+    private static final boolean ENABLE_DRIPSTONE = false;
     private static final VoxelShape SHAPE = Shapes.or(
             Block.box(0, 2, 0, 2, 16, 16),
             Block.box(14, 2, 0, 16, 16, 16),
@@ -119,16 +120,22 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
     }
     @Override
     protected boolean canReceiveStalactiteDrip(net.minecraft.world.level.material.Fluid fluid) {
-        // 中文：钟乳石滴下的水和熔岩都可以进入真实 tank。
-        // English: Water and lava from a pointed dripstone can enter the real tank.
+        // 中文：暂时关闭钟乳石滴水/滴岩浆；代码保留，改 true 即可恢复。
+        // English: Temporarily disabled; code is kept and can be restored with true.
+        if (!ENABLE_DRIPSTONE) {
+            return false;
+        }
         return fluid.isSame(Fluids.WATER) || fluid.isSame(Fluids.LAVA);
     }
 
     @Override
     protected void receiveStalactiteDrip(BlockState state, Level level, BlockPos pos,
                                           net.minecraft.world.level.material.Fluid fluid) {
-        // 中文：一次滴落只补充 5 mB，符合单滴滴落的感觉；满 tank 时由 FluidTank 拒绝。
-        // English: A drip adds only 5 mB, matching a single drip; a full tank rejects it through FluidTank.
+        // 中文：一次滴落只补充 5 mB；功能暂时禁用但保留实现。
+        // English: A drip adds only 5 mB; the feature is disabled but the implementation is kept.
+        if (!ENABLE_DRIPSTONE) {
+            return;
+        }
         if (level.getBlockEntity(pos) instanceof FluidBasinBlockEntity basin) {
             basin.getTank().fill(new FluidStack(fluid, DRIP_AMOUNT), IFluidHandler.FluidAction.EXECUTE);
         }
