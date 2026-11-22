@@ -1,6 +1,9 @@
 {
   "variants": {
-    "": {
+    "full=false": {
+      "model": "sap_extractor:block/cauldron_container"
+    },
+    "full=true": {
       "model": "sap_extractor:block/cauldron_container"
     }
   }

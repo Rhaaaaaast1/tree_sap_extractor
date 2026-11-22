@@ -38,19 +38,27 @@ public class FluidBasinRenderer implements BlockEntityRenderer<FluidBasinBlockEn
     public void render(FluidBasinBlockEntity cauldron, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight, int packedOverlay) {
         FluidStack fluid = cauldron.getTank().getFluid();
-        if (fluid.isEmpty()) {
+        boolean powderSnow = cauldron.hasPowderSnow();
+        if (!powderSnow && fluid.isEmpty()) {
             return;
         }
-        float ratio = Math.min(1.0F, fluid.getAmount() / (float) cauldron.getTank().getCapacity());
+        float ratio = powderSnow ? 1.0F : Math.min(1.0F, fluid.getAmount() / (float) cauldron.getTank().getCapacity());
         float top = MIN_TOP + (MAX_TOP - MIN_TOP) * ratio;
 
-        Fluid rawFluid = fluid.getFluid();
-        IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(rawFluid);
-        ResourceLocation texture = extensions.getStillTexture(fluid);
+        ResourceLocation texture;
+        int tint;
+        if (powderSnow) {
+            texture = ResourceLocation.withDefaultNamespace("block/powder_snow");
+            tint = 0xFFFFFFFF;
+        } else {
+            Fluid rawFluid = fluid.getFluid();
+            IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(rawFluid);
+            texture = extensions.getStillTexture(fluid);
+            tint = extensions.getTintColor(fluid);
+        }
         TextureAtlasSprite sprite = Minecraft.getInstance()
                 .getTextureAtlas(TextureAtlas.LOCATION_BLOCKS)
                 .apply(texture);
-        int tint = extensions.getTintColor(fluid);
         int alpha = (tint >>> 24) & 0xFF;
         if (alpha == 0) {
             alpha = 255;
