@@ -48,11 +48,6 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
 
-    private static final VoxelShape SHAPE_NORTH = makeShape(Direction.NORTH);
-    private static final VoxelShape SHAPE_SOUTH = makeShape(Direction.SOUTH);
-    private static final VoxelShape SHAPE_WEST = makeShape(Direction.WEST);
-    private static final VoxelShape SHAPE_EAST = makeShape(Direction.EAST);
-
     private static final VoxelShape SELECTION_NORTH = makeSelection(Direction.NORTH);
     private static final VoxelShape SELECTION_SOUTH = makeSelection(Direction.SOUTH);
     private static final VoxelShape SELECTION_WEST = makeSelection(Direction.WEST);
@@ -62,23 +57,20 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
         return rotatedBox(facing, 5.44, 8.0, 6.88, 10.56, 14.4, 16.0);
     }
 
-    private static VoxelShape makeShape(Direction facing) {
-        return Shapes.or(
-                rotatedBox(facing, 5.44, 8.8, 14.08, 10.56, 12.64, 16.0),
-                rotatedBox(facing, 6.72, 9.44, 9.6, 9.28, 12.0, 14.08),
-                rotatedBox(facing, 5.92, 12.0, 9.12, 10.08, 14.4, 13.28),
-                rotatedBox(facing, 6.88, 8.0, 6.88, 9.12, 11.36, 9.6)
-        );
-    }
-
     private static VoxelShape rotatedBox(Direction facing,
                                          double x1, double y1, double z1,
                                          double x2, double y2, double z2) {
+        double nx1 = x1 / 16.0;
+        double ny1 = y1 / 16.0;
+        double nz1 = z1 / 16.0;
+        double nx2 = x2 / 16.0;
+        double ny2 = y2 / 16.0;
+        double nz2 = z2 / 16.0;
         return switch (facing) {
-            case EAST -> Shapes.box(1.0 - z2, y1, x1, 1.0 - z1, y2, x2);
-            case SOUTH -> Shapes.box(1.0 - x2, y1, 1.0 - z2, 1.0 - x1, y2, 1.0 - z1);
-            case WEST -> Shapes.box(z1, y1, 1.0 - x2, z2, y2, 1.0 - x1);
-            default -> Shapes.box(x1, y1, z1, x2, y2, z2);
+            case EAST -> Shapes.box(1.0 - nz2, ny1, nx1, 1.0 - nz1, ny2, nx2);
+            case SOUTH -> Shapes.box(1.0 - nx2, ny1, 1.0 - nz2, 1.0 - nx1, ny2, 1.0 - nz1);
+            case WEST -> Shapes.box(nz1, ny1, 1.0 - nx2, nz2, ny2, 1.0 - nx1);
+            default -> Shapes.box(nx1, ny1, nz1, nx2, ny2, nz2);
         };
     }
 
@@ -163,10 +155,10 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         VoxelShape shape = switch (state.getValue(FACING)) {
-            case EAST -> SHAPE_EAST;
-            case SOUTH -> SHAPE_SOUTH;
-            case WEST -> SHAPE_WEST;
-            default -> SHAPE_NORTH;
+            case EAST -> SELECTION_EAST;
+            case SOUTH -> SELECTION_SOUTH;
+            case WEST -> SELECTION_WEST;
+            default -> SELECTION_NORTH;
         };
         return shape.isEmpty() ? Shapes.block() : shape;
     }

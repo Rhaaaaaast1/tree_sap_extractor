@@ -64,6 +64,7 @@ public class CauldronTankBlockEntity extends BlockEntity {
         if (level.getBlockEntity(worldPosition) instanceof CauldronTankBlockEntity replacement) {
             replacement.loadWithComponents(tankData, level.registryAccess());
         }
+        level.invalidateCapabilities(worldPosition);
     }
 
     private void seedFromBlockState() {
