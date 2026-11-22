@@ -16,7 +16,7 @@ public final class ModCreativeTabs {
                     .icon(() -> new ItemStack(ModItems.SAP_EXTRACTOR.get()))
                     .displayItems((parameters, output) -> {
                         output.accept(ModItems.SAP_EXTRACTOR.get());
-                        output.accept(ModItems.FLUID_CAULDRON.get());
+                        output.accept(ModItems.FLUID_BASIN.get());
                         output.accept(ModItems.RUBBER_BLOCK.get());
                         output.accept(ModItems.VULCANIZED_RUBBER_BLOCK.get());
                         output.accept(ModItems.RUBBER.get());

@@ -15,7 +15,7 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
  * Real 1000 mB tank for the custom cauldron. The block state only provides the
  * vanilla cauldron shape; all fluid data lives here and is drawn by the BER.
  */
-public class FluidCauldronBlockEntity extends BlockEntity {
+public class FluidBasinBlockEntity extends BlockEntity {
     private static final int CAPACITY = FluidType.BUCKET_VOLUME;
 
     private final FluidTank tank = new FluidTank(CAPACITY) {
@@ -28,8 +28,8 @@ public class FluidCauldronBlockEntity extends BlockEntity {
         }
     };
 
-    public FluidCauldronBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.FLUID_CAULDRON.get(), pos, state);
+    public FluidBasinBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.FLUID_BASIN.get(), pos, state);
     }
 
     public FluidTank getTank() {

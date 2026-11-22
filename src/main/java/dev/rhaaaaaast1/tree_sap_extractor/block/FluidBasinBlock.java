@@ -1,7 +1,7 @@
 package dev.rhaaaaaast1.tree_sap_extractor.block;
 
 import com.mojang.serialization.MapCodec;
-import dev.rhaaaaaast1.tree_sap_extractor.blockentity.FluidCauldronBlockEntity;
+import dev.rhaaaaaast1.tree_sap_extractor.blockentity.FluidBasinBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.component.DataComponents;
@@ -12,13 +12,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractCauldronBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -26,14 +31,21 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import javax.annotation.Nullable;
 
 /**
- * Cauldron-shaped fluid container backed by a real tank. The vanilla cauldron
- * model and collision are reused; the fluid surface is drawn by the BER.
+ * Basin-shaped fluid container backed by a real tank. The blockstate uses the
+ * supplied full-height basin model; the fluid surface is drawn by the BER.
  */
-public class FluidCauldronBlock extends AbstractCauldronBlock implements EntityBlock {
-    public static final MapCodec<FluidCauldronBlock> CODEC = simpleCodec(FluidCauldronBlock::new);
+public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBlock {
+    public static final MapCodec<FluidBasinBlock> CODEC = simpleCodec(FluidBasinBlock::new);
     private static final int BOTTLE_AMOUNT = 250;
+    private static final VoxelShape SHAPE = Shapes.or(
+            Block.box(0, 2, 0, 2, 16, 16),
+            Block.box(14, 2, 0, 16, 16, 16),
+            Block.box(2, 2, 0, 14, 16, 2),
+            Block.box(2, 2, 14, 14, 16, 16),
+            Block.box(1, 0, 1, 15, 2, 15)
+    );
 
-    public FluidCauldronBlock(Properties properties) {
+    public FluidBasinBlock(Properties properties) {
         super(properties, CauldronInteraction.EMPTY);
     }
 
@@ -48,12 +60,22 @@ public class FluidCauldronBlock extends AbstractCauldronBlock implements EntityB
     }
 
     @Override
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return SHAPE;
+    }
+
+    @Override
+    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return SHAPE;
+    }
+
+    @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.isClientSide) {
             return ItemInteractionResult.SUCCESS;
         }
-        if (!(level.getBlockEntity(pos) instanceof FluidCauldronBlockEntity cauldron)) {
+        if (!(level.getBlockEntity(pos) instanceof FluidBasinBlockEntity cauldron)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
         IFluidHandler tank = cauldron.getTank();
@@ -96,7 +118,7 @@ public class FluidCauldronBlock extends AbstractCauldronBlock implements EntityB
 
     @Override
     protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
-        if (level.getBlockEntity(pos) instanceof FluidCauldronBlockEntity cauldron) {
+        if (level.getBlockEntity(pos) instanceof FluidBasinBlockEntity cauldron) {
             int amount = cauldron.getTank().getFluidAmount();
             int capacity = cauldron.getTank().getCapacity();
             return capacity <= 0 ? 0 : Math.min(15, Math.round(amount * 15.0F / capacity));
@@ -106,6 +128,6 @@ public class FluidCauldronBlock extends AbstractCauldronBlock implements EntityB
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new FluidCauldronBlockEntity(pos, state);
+        return new FluidBasinBlockEntity(pos, state);
     }
 }

@@ -1,7 +1,7 @@
 package dev.rhaaaaaast1.tree_sap_extractor.block;
 
 import dev.rhaaaaaast1.tree_sap_extractor.blockentity.SapExtractorBlockEntity;
-import dev.rhaaaaaast1.tree_sap_extractor.particle.FluidDripParticleOptions;
+import dev.rhaaaaaast1.tree_sap_extractor.client.ExtractorParticleHelper;
 import dev.rhaaaaaast1.tree_sap_extractor.util.ModTags;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
@@ -201,11 +201,7 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
         if (random.nextInt(4) == 0
                 && level.getBlockEntity(pos) instanceof SapExtractorBlockEntity extractor
                 && !extractor.getOutput().isEmpty()) {
-            double x = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.05;
-            double y = pos.getY() + 0.45;
-            double z = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.05;
-            level.addParticle(new FluidDripParticleOptions(extractor.getOutput().copy()),
-                    x, y, z, 0.0, 0.0, 0.0);
+            ExtractorParticleHelper.spawn(level, pos, extractor.getOutput(), random);
         }
     }
 }

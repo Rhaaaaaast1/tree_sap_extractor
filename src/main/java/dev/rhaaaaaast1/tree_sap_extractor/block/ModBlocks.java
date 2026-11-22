@@ -15,8 +15,8 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 public final class ModBlocks {
     public static final DeferredBlock<SapExtractorBlock> SAP_EXTRACTOR =
             ModRegistry.BLOCKS.register("sap_extractor", () -> new SapExtractorBlock(extractorProperties()));
-    public static final DeferredBlock<FluidCauldronBlock> FLUID_CAULDRON =
-            ModRegistry.BLOCKS.register("fluid_basin", () -> new FluidCauldronBlock(cauldronProperties()));
+    public static final DeferredBlock<FluidBasinBlock> FLUID_BASIN =
+            ModRegistry.BLOCKS.register("fluid_basin", () -> new FluidBasinBlock(basinProperties()));
 
     public static final DeferredBlock<Block> RUBBER_BLOCK =
             ModRegistry.BLOCKS.register("rubber_block", () -> new Block(rubberBlockProperties()));
@@ -38,7 +38,7 @@ public final class ModBlocks {
                 .noOcclusion();
     }
 
-    private static BlockBehaviour.Properties cauldronProperties() {
+    private static BlockBehaviour.Properties basinProperties() {
         return BlockBehaviour.Properties.of()
                 .mapColor(MapColor.STONE)
                 .requiresCorrectToolForDrops()

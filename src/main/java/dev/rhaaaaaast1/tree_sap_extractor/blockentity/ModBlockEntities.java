@@ -10,9 +10,9 @@ public final class ModBlockEntities {
             ModRegistry.BLOCK_ENTITIES.register("sap_extractor",
                     () -> BlockEntityType.Builder.of(SapExtractorBlockEntity::new, ModBlocks.SAP_EXTRACTOR.get()).build(null));
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidCauldronBlockEntity>> FLUID_CAULDRON =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidBasinBlockEntity>> FLUID_BASIN =
             ModRegistry.BLOCK_ENTITIES.register("fluid_basin",
-                    () -> BlockEntityType.Builder.of(FluidCauldronBlockEntity::new, ModBlocks.FLUID_CAULDRON.get()).build(null));
+                    () -> BlockEntityType.Builder.of(FluidBasinBlockEntity::new, ModBlocks.FLUID_BASIN.get()).build(null));
 
     private ModBlockEntities() {
     }
