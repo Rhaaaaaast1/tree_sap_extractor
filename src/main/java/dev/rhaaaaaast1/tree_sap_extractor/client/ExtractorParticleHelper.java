@@ -1,14 +1,16 @@
 package dev.rhaaaaaast1.tree_sap_extractor.client;
 
+import dev.rhaaaaaast1.tree_sap_extractor.fluid.ModFluids;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.DripParticle;
+import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
-import dev.rhaaaaaast1.tree_sap_extractor.fluid.ModFluids;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
-import org.joml.Vector3f;
 
 public final class ExtractorParticleHelper {
     private static final int LATEX_TINT = 0xFFE6D8B8;
@@ -29,14 +31,17 @@ public final class ExtractorParticleHelper {
         } else {
             tint = IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor(fluid);
         }
-        float red = ((tint >> 16) & 0xFF) / 255.0F;
-        float green = ((tint >> 8) & 0xFF) / 255.0F;
-        float blue = (tint & 0xFF) / 255.0F;
 
         double x = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.05;
         double y = pos.getY() + 0.45;
         double z = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.05;
-        clientLevel.addParticle(new DustParticleOptions(new Vector3f(red, green, blue), 0.65F),
-                x, y, z, 0.0, -0.015, 0.0);
+        TextureSheetParticle particle = DripParticle.createHoneyFallParticle(
+                ParticleTypes.FALLING_HONEY, clientLevel, x, y, z, 0.0, -0.015, 0.0);
+        if (particle != null) {
+            particle.setColor(((tint >> 16) & 0xFF) / 255.0F,
+                    ((tint >> 8) & 0xFF) / 255.0F,
+                    (tint & 0xFF) / 255.0F);
+            Minecraft.getInstance().particleEngine.add(particle);
+        }
     }
 }
