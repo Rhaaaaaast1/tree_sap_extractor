@@ -4,12 +4,12 @@
   "leaves": "minecraft:birch_leaves",
   "fluid": {
     "id": "sap_extractor:tree_sap",
-    "amount": 50
+    "amount": 15
   },
   "time": 500,
   "min_height": 3,
-  "max_height": 32,
+  "max_height": 16,
   "min_leaves": 3,
-  "max_leaves": 64,
+  "max_leaves": 24,
   "priority": 100
 }

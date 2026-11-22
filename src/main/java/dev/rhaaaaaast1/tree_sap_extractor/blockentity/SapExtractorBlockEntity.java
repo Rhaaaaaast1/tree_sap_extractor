@@ -70,14 +70,15 @@ public class SapExtractorBlockEntity extends BlockEntity {
             progress++;
             working = true;
             if (progress >= cycleTime) {
-                if (deliverToContainer()) {
+                if (!deliverToContainer()) {
+                    progress = 0;
+                    working = false;
+                } else {
                     progress = 0;
                     setChanged();
-                } else {
-                    working = false;
                 }
             }
-        } else if (!getBlockState().getValue(SapExtractorBlock.OPEN) || !validTree || recipeId == null) {
+        } else {
             progress = 0;
         }
 
@@ -89,6 +90,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
 
     public void invalidateTree() {
         treeDirty = true;
+        containerRefreshCooldown = 0;
     }
 
     private boolean deliverToContainer() {
@@ -103,12 +105,12 @@ public class SapExtractorBlockEntity extends BlockEntity {
             return false;
         }
         int accepted = handler.fill(output, IFluidHandler.FluidAction.SIMULATE);
-        if (accepted < output.getAmount()) {
+        if (accepted <= 0) {
             containerFull = true;
             return false;
         }
-        handler.fill(output, IFluidHandler.FluidAction.EXECUTE);
-        containerFull = false;
+        handler.fill(output.copyWithAmount(accepted), IFluidHandler.FluidAction.EXECUTE);
+        containerFull = handler.fill(output, IFluidHandler.FluidAction.SIMULATE) <= 0;
         return true;
     }
 

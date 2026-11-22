@@ -24,7 +24,7 @@ public class FluidBasinRenderer implements BlockEntityRenderer<FluidBasinBlockEn
     private static final float INNER_MAX = 14.0F / 16.0F - 0.001F;
     private static final float BOTTOM = 2.0F / 16.0F + 0.001F;
     private static final float MIN_TOP = 2.5F / 16.0F;
-    private static final float MAX_TOP = 15.999F / 16.0F;
+    private static final float MAX_TOP = 15.0F / 16.0F;
 
     public FluidBasinRenderer(BlockEntityRendererProvider.Context context) {
     }
