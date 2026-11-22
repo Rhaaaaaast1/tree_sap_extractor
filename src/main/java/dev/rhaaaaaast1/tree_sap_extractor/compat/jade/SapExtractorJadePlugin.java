@@ -7,7 +7,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
@@ -95,28 +94,6 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
                 status = Component.translatable("jade.sap_extractor.status.idle");
             }
             tooltip.add(Component.translatable("jade.sap_extractor.status", status));
-
-            int cycle = data.getInt("Cycle");
-            int progress = data.getInt("Progress");
-            if (open && validTree && hasContainer && !full && cycle > 0) {
-                tooltip.add(Component.translatable("jade.sap_extractor.progress", progress, cycle));
-            }
-
-            String fluidId = data.getString("Fluid");
-            if (!fluidId.isEmpty()) {
-                Fluid fluid = BuiltInRegistries.FLUID.get(ResourceLocation.tryParse(fluidId));
-                FluidStack stack = new FluidStack(fluid, data.getInt("Amount"));
-                tooltip.add(Component.translatable("jade.sap_extractor.tank",
-                        stack.getHoverName(), data.getInt("Amount"), data.getInt("Capacity")));
-            }
-
-            String outputId = data.getString("OutputFluid");
-            if (!outputId.isEmpty()) {
-                Fluid fluid = BuiltInRegistries.FLUID.get(ResourceLocation.tryParse(outputId));
-                FluidStack stack = new FluidStack(fluid, data.getInt("OutputAmount"));
-                tooltip.add(Component.translatable("jade.sap_extractor.output",
-                        stack.getHoverName(), stack.getAmount()));
-            }
         }
 
         @Override

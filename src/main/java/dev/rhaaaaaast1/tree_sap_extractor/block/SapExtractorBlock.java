@@ -197,10 +197,10 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
         if (!state.getValue(ACTIVE)) {
             return;
         }
-        if (random.nextInt(3) == 0) {
-            double x = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.15;
+        if (random.nextInt(4) == 0) {
+            double x = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.05;
             double y = pos.getY() + 0.45;
-            double z = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.15;
+            double z = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.05;
             level.addParticle(net.minecraft.core.particles.ParticleTypes.DRIPPING_HONEY, x, y, z, 0.0, 0.0, 0.0);
         }
     }
