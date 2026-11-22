@@ -4,6 +4,10 @@
     {
       "id": "#tconstruct:tree_log",
       "required": false
+    },
+    {
+      "id": "#integrateddynamics:menril_logs",
+      "required": false
     }
   ]
 }

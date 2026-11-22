@@ -4,6 +4,14 @@
       "id": "create:basin",
       "required": false
     },
-    "sap_extractor:fluid_basin"
+    "sap_extractor:fluid_basin",
+    {
+      "id": "integrateddynamics:drying_basin",
+      "required": false
+    },
+    {
+      "id": "integrateddynamics:mechanical_drying_basin",
+      "required": false
+    }
   ]
 }
