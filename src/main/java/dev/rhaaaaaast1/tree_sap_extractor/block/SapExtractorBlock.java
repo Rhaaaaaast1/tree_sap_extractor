@@ -53,6 +53,15 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
     private static final VoxelShape SHAPE_WEST = makeShape(Direction.WEST);
     private static final VoxelShape SHAPE_EAST = makeShape(Direction.EAST);
 
+    private static final VoxelShape SELECTION_NORTH = makeSelection(Direction.NORTH);
+    private static final VoxelShape SELECTION_SOUTH = makeSelection(Direction.SOUTH);
+    private static final VoxelShape SELECTION_WEST = makeSelection(Direction.WEST);
+    private static final VoxelShape SELECTION_EAST = makeSelection(Direction.EAST);
+
+    private static VoxelShape makeSelection(Direction facing) {
+        return rotatedBox(facing, 5.44, 8.0, 6.88, 10.56, 14.4, 16.0);
+    }
+
     private static VoxelShape makeShape(Direction facing) {
         return Shapes.or(
                 rotatedBox(facing, 5.44, 8.8, 14.08, 10.56, 12.64, 16.0),
@@ -143,16 +152,21 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return switch (state.getValue(FACING)) {
-            case EAST -> SHAPE_EAST;
-            case SOUTH -> SHAPE_SOUTH;
-            case WEST -> SHAPE_WEST;
-            default -> SHAPE_NORTH;
+            case EAST -> SELECTION_EAST;
+            case SOUTH -> SELECTION_SOUTH;
+            case WEST -> SELECTION_WEST;
+            default -> SELECTION_NORTH;
         };
     }
 
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return getShape(state, level, pos, context);
+        return switch (state.getValue(FACING)) {
+            case EAST -> SHAPE_EAST;
+            case SOUTH -> SHAPE_SOUTH;
+            case WEST -> SHAPE_WEST;
+            default -> SHAPE_NORTH;
+        };
     }
 
     @Override
