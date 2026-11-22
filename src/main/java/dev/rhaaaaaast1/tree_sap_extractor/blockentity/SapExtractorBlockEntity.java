@@ -30,7 +30,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
     private static final int CONTAINER_REFRESH_INTERVAL = 40;
     private static final int DEFAULT_CYCLE = 500;
 
-    private int progress;
+    private int productionAccumulator;
     private int cycleTime = DEFAULT_CYCLE;
     private int containerRefreshCooldown;
     private boolean treeDirty = true;
@@ -67,19 +67,21 @@ public class SapExtractorBlockEntity extends BlockEntity {
 
         working = false;
         if (canRun) {
-            progress++;
             working = true;
-            if (progress >= cycleTime) {
-                if (!deliverToContainer()) {
-                    progress = 0;
-                    working = false;
-                } else {
-                    progress = 0;
+            productionAccumulator += output.getAmount();
+            int produced = productionAccumulator / cycleTime;
+            if (produced > 0) {
+                int accepted = deliverToContainer(produced);
+                if (accepted > 0) {
+                    productionAccumulator -= accepted * cycleTime;
                     setChanged();
+                } else {
+                    productionAccumulator = 0;
+                    working = false;
                 }
             }
         } else {
-            progress = 0;
+            productionAccumulator = 0;
         }
 
         BlockState worldState = level.getBlockState(worldPosition);
@@ -93,25 +95,26 @@ public class SapExtractorBlockEntity extends BlockEntity {
         containerRefreshCooldown = 0;
     }
 
-    private boolean deliverToContainer() {
+    private int deliverToContainer(int amount) {
         if (level == null) {
-            return false;
+            return 0;
         }
         IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK,
                 worldPosition.below(), Direction.UP);
         if (handler == null) {
             hasContainer = false;
             containerFull = false;
-            return false;
+            return 0;
         }
-        int accepted = handler.fill(output, IFluidHandler.FluidAction.SIMULATE);
+        FluidStack toInsert = output.copyWithAmount(amount);
+        int accepted = handler.fill(toInsert, IFluidHandler.FluidAction.SIMULATE);
         if (accepted <= 0) {
             containerFull = true;
-            return false;
+            return 0;
         }
-        handler.fill(output.copyWithAmount(accepted), IFluidHandler.FluidAction.EXECUTE);
-        containerFull = handler.fill(output, IFluidHandler.FluidAction.SIMULATE) <= 0;
-        return true;
+        handler.fill(toInsert.copyWithAmount(accepted), IFluidHandler.FluidAction.EXECUTE);
+        containerFull = handler.fill(toInsert.copyWithAmount(1), IFluidHandler.FluidAction.SIMULATE) <= 0;
+        return accepted;
     }
 
     private void refreshTree() {
@@ -156,6 +159,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
         hasContainer = SapExtractionRules.hasContainer(level, worldPosition);
         containerFull = false;
         containerRefreshCooldown = CONTAINER_REFRESH_INTERVAL;
+        productionAccumulator = 0;
     }
 
     private int countOtherExtractors(BlockPos root) {
@@ -177,7 +181,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
     }
 
     public int getProgress() {
-        return progress;
+        return productionAccumulator;
     }
 
     public int getCycleTime() {
@@ -212,7 +216,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        tag.putInt("Progress", progress);
+        tag.putInt("Progress", productionAccumulator);
         tag.putInt("CycleTime", cycleTime);
         if (recipeId != null) {
             tag.putString("Recipe", recipeId.toString());
@@ -225,7 +229,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        progress = tag.getInt("Progress");
+        productionAccumulator = tag.getInt("Progress");
         cycleTime = Math.max(1, tag.getInt("CycleTime"));
         if (tag.contains("Recipe")) {
             recipeId = ResourceLocation.tryParse(tag.getString("Recipe"));
