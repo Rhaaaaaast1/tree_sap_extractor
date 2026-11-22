@@ -41,7 +41,6 @@ public class FluidBasinBlockEntity extends BlockEntity {
     };
     private boolean powderSnow;
     private int powderSnowHeatTicks;
-    private static final int POWDER_SNOW_MELT_TICKS = 200;
     public FluidBasinBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.FLUID_BASIN.get(), pos, state);
     }
@@ -77,60 +76,60 @@ public class FluidBasinBlockEntity extends BlockEntity {
             }
         }
         // 只有细雪需要检查热源，普通流体不会进入下面的扫描。
-        if (!hasHeatSource()) {
+        // Only powder snow checks heat; ordinary fluids skip this scan.
+        int meltTicks = findHeatSourceTicks();
+        if (meltTicks <= 0) {
             powderSnowHeatTicks = 0;
             return;
         }
-        if (++powderSnowHeatTicks >= POWDER_SNOW_MELT_TICKS) {
+        if (++powderSnowHeatTicks >= meltTicks) {
             meltPowderSnow();
         }
     }
-    private boolean hasHeatSource() {
+
+    private int findHeatSourceTicks() {
         if (level == null) {
-            return false;
+            return 0;
         }
-        if (isHeatSource(level.getBlockState(worldPosition.below()))) {
-            return true;
-        }
+        int ticks = heatTicks(level.getBlockState(worldPosition.below()));
         for (Direction direction : Direction.Plane.HORIZONTAL) {
-            if (isHeatSource(level.getBlockState(worldPosition.relative(direction)))) {
-                return true;
+            int candidate = heatTicks(level.getBlockState(worldPosition.relative(direction)));
+            if (candidate > 0 && (ticks <= 0 || candidate < ticks)) {
+                ticks = candidate;
             }
         }
-        return false;
+        return ticks;
     }
-    private static boolean isHeatSource(BlockState state) {
-        // 中文：先处理原版热源，再兼容 Create 的两种烈焰人燃烧室状态。
-        // English: Handle vanilla heat sources first, then both Create blaze burner forms.
+
+    private static int heatTicks(BlockState state) {
+        // 中文：返回 0 表示无热源，200 是普通加热，100 是超级加热（5 秒）。
+        // English: 0 means no heat, 200 is normal heat, 100 is superheated (5 seconds).
         if (state.is(Blocks.CAMPFIRE) || state.is(Blocks.SOUL_CAMPFIRE)) {
-            return state.hasProperty(CampfireBlock.LIT) && state.getValue(CampfireBlock.LIT);
+            return state.hasProperty(CampfireBlock.LIT) && state.getValue(CampfireBlock.LIT) ? 200 : 0;
         }
         if (state.is(Blocks.LAVA) || state.is(Blocks.LAVA_CAULDRON)
                 || state.is(Blocks.MAGMA_BLOCK) || state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
-            return true;
+            return 200;
         }
         if (state.getFluidState().is(FluidTags.LAVA)) {
-            return true;
+            return 200;
         }
         if (state.is(Blocks.FURNACE) || state.is(Blocks.BLAST_FURNACE) || state.is(Blocks.SMOKER)) {
-            return state.hasProperty(AbstractFurnaceBlock.LIT) && state.getValue(AbstractFurnaceBlock.LIT);
+            return state.hasProperty(AbstractFurnaceBlock.LIT) && state.getValue(AbstractFurnaceBlock.LIT) ? 200 : 0;
         }
         if (isFarmerStoveLit(state)) {
-            return true;
+            return 200;
         }
-        if (isCreateBurnerActive(state)) {
-            return true;
-        }
-        var blazeBurner = BuiltInRegistries.BLOCK.get(
-                ResourceLocation.fromNamespaceAndPath("create", "blaze_burner"));
-        if (blazeBurner != Blocks.AIR && state.is(blazeBurner)) {
-            // 中文：兼容部分 Create 版本只有燃烧室方块实体、状态里没有 heat_level 的情况。
-            // English: Compatibility for Create versions that keep activity only in the block entity.
-            return true;
+        int createTicks = isCreateBurnerActive(state);
+        if (createTicks > 0) {
+            return createTicks;
         }
         var litBlazeBurner = BuiltInRegistries.BLOCK.get(
                 ResourceLocation.fromNamespaceAndPath("create", "lit_blaze_burner"));
-        return litBlazeBurner != Blocks.AIR && state.is(litBlazeBurner);
+        if (litBlazeBurner != Blocks.AIR && state.is(litBlazeBurner)) {
+            return 200;
+        }
+        return 0;
     }
 
     private static boolean isFarmerStoveLit(BlockState state) {
@@ -149,17 +148,28 @@ public class FluidBasinBlockEntity extends BlockEntity {
         return true;
     }
 
-    private static boolean isCreateBurnerActive(BlockState state) {
-        // 中文：烈焰人燃烧室有 heat_level 时，只有 kindled/seething 才算工作。
-        // English: A blaze burner with heat_level is active only when kindled/seething.
+    private static int isCreateBurnerActive(BlockState state) {
+        var blazeBurner = BuiltInRegistries.BLOCK.get(
+                ResourceLocation.fromNamespaceAndPath("create", "blaze_burner"));
+        if (blazeBurner == Blocks.AIR || !state.is(blazeBurner)) {
+            return 0;
+        }
+        // 中文：Create 6.0+ 只认燃烧/超级燃烧；普通未点燃状态不加热。
+        // English: Create 6.0+ must be kindled or seething; an unlit burner is not heat.
         for (var property : state.getProperties()) {
             if (!property.getName().equals("heat_level")) {
                 continue;
             }
             String value = state.getValue(property).toString();
-            return value.equalsIgnoreCase("kindled") || value.equalsIgnoreCase("seething");
+            if (value.equalsIgnoreCase("seething") || value.equalsIgnoreCase("superheated")) {
+                return 100;
+            }
+            if (value.equalsIgnoreCase("kindled")) {
+                return 200;
+            }
+            return 0;
         }
-        return false;
+        return 0;
     }
     private void meltPowderSnow() {
         // 细雪不是流体，所以这里直接把内容换成 1000 mB 水，再让 BER 画水。
