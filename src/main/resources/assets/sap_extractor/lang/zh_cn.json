@@ -13,19 +13,15 @@
   "item.sap_extractor.latex_bucket": "胶乳桶",
   "fluid.sap_extractor.tree_sap": "树汁",
   "fluid.sap_extractor.latex": "胶乳",
-  "jade.sap_extractor.status": "状态：%s",
   "jade.sap_extractor.status.closed": "已关闭",
   "jade.sap_extractor.status.no_tree": "未检测到树木",
   "jade.sap_extractor.status.no_container": "下方没有容器",
+  "jade.sap_extractor.status.mismatch": "容器液体不匹配",
   "jade.sap_extractor.status.full": "容器已满",
   "jade.sap_extractor.status.working": "正在采集",
   "jade.sap_extractor.status.idle": "待机",
-  "jade.sap_extractor.tank": "储罐：%s %s / %s mB",
-  "jade.sap_extractor.output": "产出：%s（每周期 %s mB）",
-  "jade.sap_extractor.progress": "进度：%s / %s tick",
-  "jade.sap_extractor.fluid": "%s：%s / %s mB",
   "jade.sap_extractor.powder_snow": "细雪",
-  "jade.sap_extractor.empty": "空",
   "config.jade.plugin_sap_extractor.sap_extractor": "树液采集器",
-  "jei.sap_extractor.extraction": "树汁提取器"
+  "config.jade.plugin_sap_extractor.fluid_basin": "流体盆",
+  "jei.sap_extractor.extraction": "树液采集"
 }

@@ -8,17 +8,12 @@
     "minecraft:andesite",
     "minecraft:deepslate",
     "minecraft:tuff",
-    {
-      "id": "#tconstruct:slimy_soil",
-      "required": false
-    },
-    {
-      "id": "#tconstruct:slimy_nylium",
-      "required": false
-    },
-    {
-      "id": "#tconstruct:slimy_grass",
-      "required": false
-    }
+    "minecraft:mud",
+    "minecraft:muddy_mangrove_roots",
+    "minecraft:sand",
+    "minecraft:red_sand",
+    "minecraft:gravel",
+    "minecraft:suspicious_sand",
+    "minecraft:suspicious_gravel"
   ]
 }

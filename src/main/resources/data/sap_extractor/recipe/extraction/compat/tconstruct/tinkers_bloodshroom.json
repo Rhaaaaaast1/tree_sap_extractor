@@ -8,6 +8,7 @@
   "type": "sap_extractor:extraction",
   "log": "tconstruct:bloodshroom_log",
   "leaves": "tconstruct:blood_slime_leaves",
+  "soil": "#sap_extractor:tconstruct_soil",
   "fluid": {
     "id": "tconstruct:ichor",
     "amount": 15

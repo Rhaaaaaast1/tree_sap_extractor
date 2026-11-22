@@ -13,8 +13,8 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
@@ -23,14 +23,19 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.neoforged.fml.ModList;
 import dev.rhaaaaaast1.tree_sap_extractor.block.FluidBasinBlock;
+import dev.rhaaaaaast1.tree_sap_extractor.compat.create.CreateHeatCompat;
 /**
  * Real 1000 mB tank for the fluid basin. The block state only provides the
  * basin shape; all fluid data lives here and is drawn by the BER.
  */
 public class FluidBasinBlockEntity extends BlockEntity {
     private static final int CAPACITY = FluidType.BUCKET_VOLUME;
+    // 原版随机刻平均 1366 tick 命中一次，这里按 20 tick 检查一次，等效于只给流体盆提高随机刻频率。
+    private static final int RAIN_CHECK_INTERVAL = 20;
     private final FluidTank tank = new FluidTank(CAPACITY) {
         @Override
         protected void onContentsChanged() {
@@ -41,6 +46,7 @@ public class FluidBasinBlockEntity extends BlockEntity {
     };
     private boolean powderSnow;
     private int powderSnowHeatTicks;
+    private int rainCheckTicks;
     public FluidBasinBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.FLUID_BASIN.get(), pos, state);
     }
@@ -68,6 +74,10 @@ public class FluidBasinBlockEntity extends BlockEntity {
         if (level == null || level.isClientSide) {
             return;
         }
+        if (++rainCheckTicks >= RAIN_CHECK_INTERVAL) {
+            rainCheckTicks = 0;
+            tryRainFill();
+        }
         if (!powderSnow) {
             powderSnow = hasPowderSnow();
             powderSnowHeatTicks = 0;
@@ -85,6 +95,24 @@ public class FluidBasinBlockEntity extends BlockEntity {
         if (++powderSnowHeatTicks >= meltTicks) {
             meltPowderSnow();
         }
+    }
+
+    private void tryRainFill() {
+        if (!(level instanceof ServerLevel serverLevel) || hasPowderSnow()) {
+            return;
+        }
+        if (!serverLevel.isRainingAt(worldPosition.above())) {
+            return;
+        }
+        FluidStack current = tank.getFluid();
+        // 盆内已有树液等其他流体时不接雨水，避免混入其他产出。
+        if (!current.isEmpty() && !current.is(Fluids.WATER)) {
+            return;
+        }
+        if (current.getAmount() >= tank.getCapacity()) {
+            return;
+        }
+        tank.fill(new FluidStack(Fluids.WATER, 1 + serverLevel.random.nextInt(10)), IFluidHandler.FluidAction.EXECUTE);
     }
 
     private int findHeatSourceTicks() {
@@ -120,21 +148,12 @@ public class FluidBasinBlockEntity extends BlockEntity {
         if (isFarmerStoveLit(state)) {
             return 200;
         }
-        int createTicks = isCreateBurnerActive(state);
-        if (createTicks > 0) {
-            return createTicks;
-        }
-        var litBlazeBurner = BuiltInRegistries.BLOCK.get(
-                ResourceLocation.fromNamespaceAndPath("create", "lit_blaze_burner"));
-        if (litBlazeBurner != Blocks.AIR && state.is(litBlazeBurner)) {
-            // 中文：灵魂火焰视为超级燃烧，5 秒融化。
-            // English: Soul flame counts as superheated and melts in 5 seconds.
-            for (var property : state.getProperties()) {
-                if (property.getName().equals("flame_type")) {
-                    return state.getValue(property).toString().equalsIgnoreCase("soul") ? 100 : 200;
-                }
+        // 机械动力未安装时不能加载它的类，先判断模组是否在场再调用兼容层。
+        if (ModList.get().isLoaded("create")) {
+            int createTicks = CreateHeatCompat.heatTicks(state);
+            if (createTicks > 0) {
+                return createTicks;
             }
-            return 200;
         }
         return 0;
     }
@@ -155,29 +174,6 @@ public class FluidBasinBlockEntity extends BlockEntity {
         return true;
     }
 
-    private static int isCreateBurnerActive(BlockState state) {
-        var blazeBurner = BuiltInRegistries.BLOCK.get(
-                ResourceLocation.fromNamespaceAndPath("create", "blaze_burner"));
-        if (blazeBurner == Blocks.AIR || !state.is(blazeBurner)) {
-            return 0;
-        }
-        // 中文：Create 6.0+ 只认燃烧/超级燃烧；普通未点燃状态不加热。
-        // English: Create 6.0+ must be kindled or seething; an unlit burner is not heat.
-        for (var property : state.getProperties()) {
-            if (!property.getName().equals("heat_level")) {
-                continue;
-            }
-            String value = state.getValue(property).toString();
-            if (value.equalsIgnoreCase("seething") || value.equalsIgnoreCase("superheated")) {
-                return 100;
-            }
-            if (value.equalsIgnoreCase("kindled")) {
-                return 200;
-            }
-            return 0;
-        }
-        return 0;
-    }
     private void meltPowderSnow() {
         // 细雪不是流体，所以这里直接把内容换成 1000 mB 水，再让 BER 画水。
         powderSnow = false;

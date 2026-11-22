@@ -6,9 +6,9 @@
 
 采集器是水平朝向方块，方块状态包含 `facing`、`open`、`active`。放置时要求点击面为水平面，并且被贴方块属于 `sap_extractor:tree_logs`；被贴方块不再属于该标签时方块自行破坏并掉落物品。
 
-右键方块任意面都切换开关，空手与手持物品都会触发，代码不判断点击面。切换播放拉杆音效，`open` 状态写入方块状态。
+右键方块任意面都切换开关，空手与手持物品都会触发，代码不判断点击面。切换播放拉杆音效，`open` 状态写入方块状态。红石不写入方块状态，方块实体每 tick 读取邻居信号，电平每变化一次就把 `open` 翻转一次：拉杆拉下翻转一次，扳上再翻转一次。信号保持期间不再干预，手动右键的结果会被保留。Jade 不显示红石状态，只看 `open` 的当前值。
 
-方块实体只在服务端执行。每 tick 的顺序是：`treeDirty` 为真时重新扫描树木；容器检查冷却归零时重新确认容器；前两项之外，条件满足就把本周期产量累加到内部计数器并向下注入。`active` 只在真正注入流体的 tick 为真，粒子和 Jade 状态都读取它。采集器没有内部流体缓存，产物直接进入下方容器。
+方块实体只在服务端执行。每 tick 的顺序是：`treeDirty` 为真且扫描延迟归零时重新扫描树木，相邻方块变化会把延迟重置为 10 tick，避免树叶衰减这类高频更新反复触发全量遍历；容器检查冷却归零时重新确认容器；前两项之外，条件满足就把本周期产量累加到内部计数器并向下注入。`active` 只在真正注入流体的 tick 为真，粒子和 Jade 状态都读取它。采集器没有内部流体缓存，产物直接进入下方容器。
 
 ## 方块与物品
 
@@ -20,12 +20,12 @@
 | `sap_extractor:vulcanized_rubber_block` | 方块与物品 | 9 个硫化橡胶合成 |
 | `sap_extractor:rubber` | 物品 | 胶乳桶无序合成 9 个，或流体处理获得 |
 | `sap_extractor:vulcanized_rubber` | 物品 | 橡胶烧炼 200 tick 获得，经验 0.3 |
-| `sap_extractor:tree_sap_bottle` | 物品 | 玻璃瓶加树汁桶无序合成，堆叠上限 16，用后返还玻璃瓶 |
+| `sap_extractor:tree_sap_bottle` | 物品 | 玻璃瓶加树汁桶无序合成，堆叠上限 16，用后返还玻璃瓶；玻璃瓶右键装有树汁的容器会消耗 250 mB 并装入瓶中 |
 | `sap_extractor:tree_sap_bucket`、`sap_extractor:latex_bucket` | 物品 | 对应流体的桶 |
 
 `tree_sap` 与 `latex` 都是可放置的源流体，各自注册源状态、流动状态、液体方块与桶。流体参数为密度 1200、黏度 1800、温度 300、流动 `tickRate` 15、每格衰减 2 级、扩散距离 3 格、不可转换成源、不能乘船。液体方块无掉落物，抗爆 100。
 
-加工链路：胶乳桶无序合成 9 个橡胶；9 个橡胶与橡胶块互转；橡胶烧炼为硫化橡胶；9 个硫化橡胶与硫化橡胶块互转；瓶装树汁在烟熏炉 100 tick 加工为糖，经验 0.35。糖的产出使用 `sap_extractor:smoking` 配方类型，成品带上 `sap_extractor:from_sap_bottle` 组件，玩家取出时返还空玻璃瓶。
+加工链路：胶乳桶无序合成 9 个橡胶；9 个橡胶与橡胶块互转；橡胶烧炼为硫化橡胶；9 个硫化橡胶与硫化橡胶块互转；瓶装树汁在烟熏炉 100 tick 加工为糖，经验 0.35。糖的产出使用 `sap_extractor:smoking` 配方类型，成品带上 `sap_extractor:from_sap_bottle` 组件，玩家取出时返还空玻璃瓶。装有 Create 时还有三条注液配方：玻璃瓶加 250 mB 树汁得到瓶装树汁，桶加 1000 mB 树汁得到树汁桶，桶加 1000 mB 胶乳得到胶乳桶。
 
 ## 树判定
 
@@ -35,13 +35,15 @@
 
 第二步，跳过 `log` 不匹配所贴方块的配方，其余配方逐条执行后续步骤，第一条通过完整判定即返回，后续配方不再尝试。
 
-第三步，寻找树根。从所贴原木向下偏移 0 到 3 格逐个检查，候选方块必须匹配该配方的 `log`，并且候选方块下方一格属于 `sap_extractor:tree_soil`。
+第三步，寻找树根。先在所贴原木正下方 0 到 3 格逐格检查，候选方块必须匹配该配方的 `log`，并且从候选方块向上数出的连续原木数要达到 `min_height`。着地判定从候选方块下方一格开始，向下最多 10 格：遇到匹配该配方 `soil` 的方块判定着地，遇到 `sap_extractor:tree_roots` 继续向下，遇到其他方块判定失败。`soil` 缺省为 `#sap_extractor:tree_soil`，匠魂四种史莱姆树显式指定 `#sap_extractor:tconstruct_soil`，因此只认黏液土壤。红树与末影皮木的树干由根生成器抬高 1 到 7 格，这一段就是靠穿透根方块解决的。
 
-第四步，统计连续原木。从候选方块向上最多 `max_height` 格，遇到不匹配立即停止；数量达到 `min_height` 时把该候选定为树根并记录原木数，否则继续向下尝试。向下三个偏移都不满足时该配方判定失败。
+第四步，竖向路径不成立时做连通搜索。从所贴原木出发沿 26 个方向遍历匹配 `log` 的方块，范围限制为水平 ±6 格、向上 40 格、向下 24 格，最多收集 256 个方块。只把每根柱子的底端当作候选，即下方不匹配 `log` 的方块，并从每个候选向上数连续原木，达不到 `min_height` 的列直接跳过。在候选中取 `y` 最小的一个作为树根。若整个连通分量里没有任何柱底满足着地判定，退化为取柱高最大的一根作为名义树根，不要求着地。红树的根柱只向下延伸有限距离，柱底下方常是水，树干本身也会被根生成器抬到空中，这条退化路径就是给这类树准备的，树是否成立最终由树叶数决定。红树与末影皮木的侧枝第一格位于主干上方一格的斜角位置，只与主干共棱，因此搜索范围必须包含 26 个方向，只判面相邻的搜索走不通。
 
-第五步，统计树叶。以树根的水平坐标为中心，`x` 与 `z` 各取 -1 到 1；`y` 从所贴原木的高度开始，到 `min(世界高度上限, 所贴原木高度 + 40)` 结束。只统计匹配 `leaves` 的方块，带有 `persistent` 属性且值为 `true` 的树叶不计入，计数达到 `max_leaves` 时立即结束扫描。
+第五步，统计连续原木。从树根向上最多 `max_height` 格，遇到不匹配立即停止；数量达到 `min_height` 时记录原木数，否则该配方判定失败。侧枝原木不计入原木数，红树与末影皮木的产量仍按主干高度计算。
 
-第六步，树叶数达到 `min_leaves` 时判定有效，返回配方、树根、原木数和树叶数；否则该配方判定失败。
+第六步，统计树叶。以最高的一格原木为起点，沿 26 个方向做广度优先遍历，只进入匹配 `leaves` 的树叶或匹配 `log` 的原木，且与起点的曼哈顿距离不得超过 6。带有 `persistent` 属性且值为 `true` 的树叶不计入，也不会继续向外扩展。计数达到 `max_leaves` 时立即结束。红树的树冠由 `random_spread_foliage_placer` 撒点生成，半径 3、每个挂点尝试 70 次，叶片分散在整棵树上，柱状扫描会漏掉大部分，连通遍历能覆盖住。
+
+第七步，树叶数达到 `min_leaves` 时判定有效，返回配方、树根、原木数和树叶数；否则该配方判定失败。
 
 缓存内容只有 `validTree`、`recipeId`、`output`、`cycleTime`，树根坐标与树叶坐标不缓存。相邻方块变化调用 `invalidateTree()`，把 `treeDirty` 置真并让容器检查立即过期，下一次 tick 重扫。容器检查周期到期只重新确认容器，不重扫树木。方块实体从 NBT 恢复后同样把 `treeDirty` 置真。
 
@@ -60,7 +62,7 @@ cycleTime = max(1, round(time * (1 + otherExtractors * 0.5)))
 
 每个 tick 把 `output` 累加到 `productionAccumulator`，再用整数除法除以 `cycleTime` 得到本 tick 的注入量。单 tick 注入量可能大于 1 mB，高产量树在满周期后的瞬间会出现一次较大的注入，随后按周期均摊。
 
-注入使用模拟与实际两步：先模拟得到容器实际能接收的量，再按该量实际注入，接受的量乘以 `cycleTime` 后从计数器扣除，避免流体丢失。模拟结果为 0 时把 `containerFull` 置真并清空计数器，防止拆掉容器再放回时集中吐出流体。注入完成后再次模拟 1 mB，据此判断容器是否已满。
+注入使用模拟与实际两步：先模拟得到容器实际能接收的量，再按该量实际注入，接受的量乘以 `cycleTime` 后从计数器扣除，避免流体丢失。模拟结果为 0 时先比较容器内已有流体与当前产出的流体，不同则标记为液体不匹配，相同才标记为已满，两种情况都会清空计数器，防止拆掉容器再放回时集中吐出流体。注入完成后再次模拟 1 mB，据此判断容器是否已满。
 
 任意运行条件不满足时计数器清零，进度不保留。条件包括 `open` 为假、无有效树、无容器、容器已满、无匹配配方。
 
@@ -80,11 +82,13 @@ cycleTime = max(1, round(time * (1 + otherExtractors * 0.5)))
 
 交互规则：玻璃瓶在水量不少于 250 mB 时取出水瓶并扣除 250 mB；水瓶注入 250 mB 水并返还玻璃瓶；细雪桶与空桶互换细雪状态；其余物品交给 `FluidUtil` 处理任意流体容器。
 
-降水回调只处理雨，每次注入 1 mB 水。原版每 tick 调用一次降水逻辑，装满 1000 mB 约需 50 秒。细雪状态和已满的盆会跳过注入。
+玻璃瓶右键任意提供流体能力的方块时，如果其中装有至少 250 mB 树汁，会先扣掉 250 mB 并给出一瓶瓶装树汁，这次点击不再传给方块本身。这条逻辑由 `PlayerInteractEvent.RightClickBlock` 处理，覆盖本模组流体盆、Create 流体盆与其他模组的储罐，水和胶乳不受影响，仍走各自原本的交互。
 
-细雪状态下实体进入盆内逐 tick 增加冻结值，上限 140，并标记为处于细雪中。融化检查覆盖下方与四个水平相邻方块，取时间最短的热源：点燃的营火与灵魂营火、熔岩、岩浆块、火与灵魂火、点燃的熔炉类方块、农夫乐事炉灶、Create 的加热器算 200 tick；Create 燃烧器的 seething 状态与灵魂火算 100 tick。达到时间后细雪变成 1000 mB 水。
+原版随机刻无法按方块单独调整频率，流体盆改为在方块实体的 `serverTick` 里每 20 tick 检查一次 `ServerLevel.isRainingAt(pos.above())`，等效于只给这个方块提高随机刻频率。检查通过且盆内为空或只有水时注入 1 到 10 mB 水，装满 1000 mB 后停止。盆内装有树液、胶乳、门瑞欧树脂等其他流体时直接返回，不与采集器的产出争用容量。
 
-钟乳石滴落逻辑保留在代码中，由 `ENABLE_DRIPSTONE = false` 禁用，每次滴落 5 mB。
+细雪状态下实体进入盆内逐 tick 增加冻结值，上限 140，并标记为处于细雪中。融化检查覆盖下方与四个水平相邻方块，取时间最短的热源：点燃的营火与灵魂营火、熔岩、岩浆块、火与灵魂火、点燃的熔炉类方块、农夫乐事炉灶算 200 tick；Create 的烈焰人燃烧室直接调用 `BlazeBurnerBlock.getHeatLevelOf` 判定，KINDLED 算 200 tick，SEETHING 算 100 tick，未点燃不加热。达到时间后细雪变成 1000 mB 水。
+
+钟乳石滴落保留原版的接收回调，由钟乳石自身的随机刻驱动。`canReceiveStalactiteDrip` 接受水与岩浆，`receiveStalactiteDrip` 每次注入 1 到 10 mB；盆内为空或已是同种流体才写入，其他流体直接返回。
 
 液面由方块实体渲染器按储量比例绘制，从底部 `2/16` 格到最高 `15/16` 格，贴图与颜色取自当前流体。
 
@@ -96,6 +100,7 @@ cycleTime = max(1, round(time * (1 + otherExtractors * 0.5)))
 | --- | --- | --- | --- |
 | `log` | 方块 id 或 `#标签` | 必填 | 采集器所贴方块必须匹配 |
 | `leaves` | 方块 id 或 `#标签` | `#minecraft:leaves` | 参与计数的树叶 |
+| `soil` | 方块 id 或 `#标签` | `#sap_extractor:tree_soil` | 树根下方允许的着地土壤 |
 | `fluid` | `{ "id": "...", "amount": n }` | 必填 | 每周期基础产量 |
 | `time` | 整数 | 500 | 基础周期 tick，最小 1 |
 | `min_height` | 整数 | 3 | 有效树的最少连续原木数，最小 1 |
@@ -106,13 +111,13 @@ cycleTime = max(1, round(time * (1 + otherExtractors * 0.5)))
 
 `fluid` 同时接受 `{ "fluid": "命名空间:流体", "amount": n }`，这个分支的 `amount` 缺省为 1000；使用 `{ "id": ... }` 形式时必须写出 `amount`。
 
-`log` 与 `leaves` 只接受方块 id 或方块标签。解析时直接查询方块注册表，写成物品 id 会在加载阶段报 `Unknown block in extraction recipe`。引用其他模组的方块必须带 `neoforge:mod_loaded` 条件，否则对方模组未安装时同样解析失败。
+`log`、`leaves` 与 `soil` 只接受方块 id 或方块标签。解析时直接查询方块注册表，写成物品 id 会在加载阶段报 `Unknown block in extraction recipe`。引用其他模组的方块必须带 `neoforge:mod_loaded` 条件，否则对方模组未安装时同样解析失败。
 
 现有配方：
 
 - `sap_extractor:extraction/tree_sap_from_logs`：`#minecraft:logs` 与 `#minecraft:leaves`，树汁 10 mB，`priority` 0，作为通用回退，`leaves` 与 `log` 的匹配范围不同，可覆盖未单独配置的树。
 - 8 个原版树种配方：橡木、云杉、白桦、丛林、金合欢、深色橡木、樱桃、红树。除丛林产出 30 mB 胶乳外，其余产出 15 mB 树汁，`priority` 均为 100。
-- `extraction/compat/tconstruct` 下的 4 个史莱姆树配方：血菌木、末影菌木、绿心木、天空木，各产出 15 mB 对应史莱姆流体。
+- `extraction/compat/tconstruct` 下的 4 个史莱姆树配方：血菌木、末影菌木、绿心木、天空木，各产出 15 mB 对应史莱姆流体，`soil` 指定 `#sap_extractor:tconstruct_soil`，只认黏液土壤。
 - `extraction/compat/integrateddynamics` 下的门瑞欧配方：`menril_log` 与 `menril_log_filled` 各一条，各产出 10 mB 门瑞欧树脂。
 
 全部配方都位于 `sap_extractor` 命名空间，配方 id 由 `data/sap_extractor/recipe` 之后的路径决定。
@@ -126,6 +131,7 @@ ServerEvents.recipes(event => {
   event.recipes.sap_extractor.extraction(
     'minecraft:oak_log',                    // log
     'minecraft:oak_leaves',                 // leaves
+    '#sap_extractor:tree_soil',             // soil
     Fluid.of('sap_extractor:tree_sap', 15), // fluid 与 amount
     500,                                     // time
     3,                                       // min_height
@@ -144,6 +150,7 @@ event.custom({
   type: 'sap_extractor:extraction',
   log: 'minecraft:oak_log',
   leaves: 'minecraft:oak_leaves',
+  soil: '#sap_extractor:tree_soil',
   fluid: { id: 'sap_extractor:tree_sap', amount: 15 },
   time: 500,
   min_height: 3,
@@ -177,33 +184,38 @@ data/sap_extractor/recipe/compat/<modid>/<id>.json
 
 第一行是采集配方，第二行是其他类型的兼容配方。每条兼容配方都带 `neoforge:mod_loaded` 条件，对方模组未安装时整条配方被跳过。方块标签的兼容条目以 `required: false` 追加在 `data/sap_extractor/tags/block/tree_logs.json` 与 `containers.json` 里，对方模组未安装时该条目被忽略。
 
+Create 的兼容配方都在 `data/sap_extractor/recipe/compat/create`，全部直接写方块与流体 id：`rubber_from_latex.json` 用压块把 250 mB 胶乳变成橡胶；`tree_sap_bottle.json`、`tree_sap_bucket.json`、`latex_bucket.json` 用注液把 250 mB 树汁装入玻璃瓶、1000 mB 树汁装入桶、1000 mB 胶乳装入桶。
+
 门瑞欧树脂按方块拆成两条配方：`data/sap_extractor/recipe/extraction/compat/integrateddynamics/menril_log.json` 对应 `integrateddynamics:menril_log`，`menril_log_filled.json` 对应 `integrateddynamics:menril_log_filled`；两条的 `leaves` 都是 `integrateddynamics:menril_leaves`，`fluid` 10 mB，`time` 500，`priority` 100，并带 `neoforge:mod_loaded` 条件。主标签把这两个方块 id 以 `required: false` 加入 `tree_logs`，把 `integrateddynamics:drying_basin` 与 `integrateddynamics:mechanical_drying_basin` 加入 `containers`。缺少 `tree_logs` 条目时，采集器右键门瑞欧原木不会出现放置状态。
 
-门瑞欧树由 `integrateddynamics:tree_menril` 生成，主干高度 5 到 9 格，底座与顶部各有十字加粗段，连续原木数为 8 到 12 格，树冠半径 2、固定 5 层。中心列从底座到加粗段顶端保持连续，采集器贴在中心列距地面 0 到 3 格的位置可以正常判定；贴在加粗段侧面的方块上，放置能通过，树根搜索失败，界面显示未检测到树木。10 mB 的基础产量在这个树干尺寸下每周期产出约 53 到 65 mB，与原版树种持平。
+门瑞欧树由 `integrateddynamics:tree_menril` 生成，主干高度 5 到 9 格，底座与顶部各有十字加粗段，连续原木数为 8 到 12 格，树冠半径 2、固定 5 层。中心列从底座到加粗段顶端保持连续，采集器贴在中心列或加粗段侧面的原木上都能通过连通搜索回到主干底部。10 mB 的基础产量在这个树干尺寸下每周期产出约 53 到 65 mB，与原版树种持平。
 
 ## 标签
 
 | 标签 | 内容 |
 | --- | --- |
 | `sap_extractor:tree_logs` | `#minecraft:logs`，可选 `#tconstruct:tree_log` 与 `#integrateddynamics:menril_logs` |
-| `sap_extractor:tree_soil` | `#minecraft:dirt`、`#c:stones`、石头、花岗岩、闪长岩、安山岩、深板岩、凝灰岩，可选三个匠魂黏液土壤标签 |
+| `sap_extractor:tree_soil` | `#minecraft:dirt`、`#c:stones`、石头、花岗岩、闪长岩、安山岩、深板岩、凝灰岩、`minecraft:mud`、`minecraft:muddy_mangrove_roots`、沙、红沙、砂砾、可疑的沙与砂砾 |
+| `sap_extractor:tconstruct_soil` | `#tconstruct:slimy_soil`、`#tconstruct:slimy_nylium`、`#tconstruct:slimy_grass`，全部为可选条目，匠魂四种史莱姆树的配方专用 |
+| `sap_extractor:tree_roots` | `minecraft:mangrove_roots`、`minecraft:muddy_mangrove_roots`，可选 `tconstruct:enderbark_roots` 与四种颜色变体 |
 | `sap_extractor:containers` | `sap_extractor:fluid_basin`，可选 `create:basin`、`integrateddynamics:drying_basin`、`integrateddynamics:mechanical_drying_basin` |
-| `sap_extractor:jungle_leaves` | `minecraft:jungle_leaves` |
+| `c:tree_sap` | `sap_extractor:tree_sap`，放在 `data/c/tags/fluid` 下，遵循通用标签命名 |
+| `c:latex` | `sap_extractor:latex`，放在 `data/c/tags/fluid` 下，遵循通用标签命名 |
 
 `tree_logs` 同时控制放置与存活检查，任何模组的原木要能被采集器贴住，都必须并入该标签。
 
 ## 客户端表现
 
-Jade 在采集器上显示一行状态，取值依次为已关闭、未检测到树木、下方没有容器、容器已满、正在采集、待机。状态由服务端数据提供者写入，判断顺序与上面一致。流体盆移除 Jade 默认的通用流体槽，改为窄流体图标加一行储量文字，细雪状态只显示“细雪”，空盆显示“空”。
+Jade 在采集器上显示一行状态，取值依次为已关闭、未检测到树木、下方没有容器、容器液体不匹配、容器已满、正在采集、待机。状态由服务端数据提供者写入，判断顺序与上面一致。流体盆使用 Jade 自带的通用流体槽，槽内显示流体名称、当前储量与容量，不追加额外文字行。唯一例外是细雪：细雪不是流体，只记录在方块状态里，通用流体槽显示为空，因此额外补一行“细雪”。
 
-JEI 的 `树汁提取器` 类别按固定布局展示：顶部三个树叶格、中间与下方两个原木格、右侧一个流体输出格，流体使用自定义图标渲染。标签型 `log` 与 `leaves` 只取标签中的第一个方块作为展示，不展开全部成员。
+JEI 的 `树汁提取器` 类别按固定布局展示：顶部三个树叶格、中间与下方两个原木格、右侧一个流体输出格，流体使用自定义图标渲染。数据包里有几条配方就展示几条，不做筛选；`log` 与 `leaves` 写成标签时，槽内会轮换显示标签的全部成员。
 
 粒子由客户端配置 `enableParticles` 控制，默认开启，配置文件位于 `run/config/sap_extractor-client.toml`。只有 `active` 为真时才生成，每个 tick 有四分之一的概率生成一次，颜色取自当前产出流体。
 
 ## 排查
 
 - 采集器无法放置：被贴方块不在 `sap_extractor:tree_logs` 中，或点击面为竖直面。
-- 显示未检测到树木：`log` 不匹配所贴方块；树根下方不属于 `tree_soil`；连续原木数不足 `min_height`；所贴原木距树根超过 3 格；树叶数不足 `min_leaves`。
+- 显示未检测到树木：`log` 不匹配所贴方块；连通分量内没有高度达到 `min_height` 的垂直柱；有柱但全部不满足着地判定且没有可退化的高柱；树叶数不足 `min_leaves`。
 - 有树但树叶计数为 0：`leaves` 未覆盖该树的树叶，或树叶全部是玩家放置的 `persistent = true`。
 - 配方加载报错：`log` 或 `leaves` 写成了物品 id；引用了未安装模组的方块却没有 `neoforge:mod_loaded` 条件。
 - 产量异常偏高：检查 `max_height` 与 `max_leaves`，这两个值同时限制产量系数和扫描上限。
@@ -211,10 +223,11 @@ JEI 的 `树汁提取器` 类别按固定布局展示：顶部三个树叶格、
 
 ## 已知限制
 
-- 树叶扫描范围固定为水平 ±1 格，宽冠树的边缘树叶不计入。
-- 树叶统计从所贴原木的高度开始，贴在树干高处会漏掉下方的树叶。
-- 树根只在所贴原木向下 3 格内查找，贴得更高时判定失败。
-- 树干要求从树根向上连续匹配同一个 `log`，混种或间断的树干无法通过。
+- 树叶统计的曼哈顿距离上限为 6，超出这个范围的边缘树叶不计入。
+- 着地判定只沿柱底正下方一列穿透根方块，根部先横向伸展再落地时不算着地；这类树会退化为取连通分量内最高的垂直柱，树是否成立由树叶数决定。
+- 退化路径不要求着地，因此把一根足够高的原木柱紧贴真树放置，可能被判定为同一棵树。
+- 连通搜索最多收集 256 个原木，超出部分不参与树根定位。
+- 树干要求从树根向上连续匹配同一个 `log`，间断的树干无法通过；侧枝原木不计入原木数。
 - 单 tick 注入量可以大于 1 mB，流量表在高产量树上会看到阶梯式注入。
 
 ## 构建

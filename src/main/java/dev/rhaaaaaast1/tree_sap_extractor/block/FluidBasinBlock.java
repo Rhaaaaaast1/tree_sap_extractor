@@ -24,11 +24,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -37,6 +36,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import javax.annotation.Nullable;
 /**
  * Basin-shaped fluid container backed by a real tank. The blockstate uses the
@@ -47,8 +47,6 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
     public static final BooleanProperty FULL = BooleanProperty.create("full");
     public static final BooleanProperty POWDER_SNOW = BooleanProperty.create("powder_snow");
     private static final int BOTTLE_AMOUNT = 250;
-    private static final int DRIP_AMOUNT = 5;
-    private static final boolean ENABLE_DRIPSTONE = false;
     private static final VoxelShape SHAPE = Shapes.or(
             Block.box(0, 2, 0, 2, 16, 16),
             Block.box(14, 2, 0, 16, 16, 16),
@@ -106,46 +104,34 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
         }
     }
     @Override
-    public void handlePrecipitation(BlockState state, Level level, BlockPos pos, net.minecraft.world.level.biome.Biome.Precipitation precipitation) {
-        if (precipitation != net.minecraft.world.level.biome.Biome.Precipitation.RAIN
-                || !(level.getBlockEntity(pos) instanceof FluidBasinBlockEntity basin)
-                || basin.hasPowderSnow()) {
-            return;
-        }
-        FluidStack fluid = basin.getTank().getFluid();
-        if ((fluid.isEmpty() || fluid.is(Fluids.WATER)) && fluid.getAmount() < basin.getTank().getCapacity()) {
-            basin.getTank().fill(new FluidStack(Fluids.WATER, 1), IFluidHandler.FluidAction.EXECUTE);
-            level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 0.4F, 1.0F);
-        }
-    }
-    @Override
-    protected boolean canReceiveStalactiteDrip(net.minecraft.world.level.material.Fluid fluid) {
-        // 中文：暂时关闭钟乳石滴水/滴岩浆；代码保留，改 true 即可恢复。
-        // English: Temporarily disabled; code is kept and can be restored with true.
-        if (!ENABLE_DRIPSTONE) {
-            return false;
-        }
+    protected boolean canReceiveStalactiteDrip(Fluid fluid) {
         return fluid.isSame(Fluids.WATER) || fluid.isSame(Fluids.LAVA);
     }
 
     @Override
-    protected void receiveStalactiteDrip(BlockState state, Level level, BlockPos pos,
-                                          net.minecraft.world.level.material.Fluid fluid) {
-        // 中文：一次滴落只补充 5 mB；功能暂时禁用但保留实现。
-        // English: A drip adds only 5 mB; the feature is disabled but the implementation is kept.
-        if (!ENABLE_DRIPSTONE) {
+    protected void receiveStalactiteDrip(BlockState state, Level level, BlockPos pos, Fluid fluid) {
+        if (!(level.getBlockEntity(pos) instanceof FluidBasinBlockEntity basin) || basin.hasPowderSnow()) {
             return;
         }
-        if (level.getBlockEntity(pos) instanceof FluidBasinBlockEntity basin) {
-            basin.getTank().fill(new FluidStack(fluid, DRIP_AMOUNT), IFluidHandler.FluidAction.EXECUTE);
+        FluidTank tank = basin.getTank();
+        FluidStack current = tank.getFluid();
+        // 只接收空盆或同种流体，盆内已有其他内容时直接返回。
+        if (!current.isEmpty() && !current.is(fluid)) {
+            return;
         }
+        if (current.getAmount() >= tank.getCapacity()) {
+            return;
+        }
+        tank.fill(new FluidStack(fluid, 1 + level.random.nextInt(10)), IFluidHandler.FluidAction.EXECUTE);
     }
 
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.isClientSide) {
-            return ItemInteractionResult.SUCCESS;
+            // 客户端不预测交互结果，交给服务端决定，否则手持方块右键盆面会被拦下无法放置。
+            // Let the server decide instead of consuming the click locally, so blocks can still be placed.
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
         if (!(level.getBlockEntity(pos) instanceof FluidBasinBlockEntity cauldron)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;

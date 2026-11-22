@@ -8,6 +8,7 @@
   "type": "sap_extractor:extraction",
   "log": "tconstruct:skyroot_log",
   "leaves": "tconstruct:sky_slime_leaves",
+  "soil": "#sap_extractor:tconstruct_soil",
   "fluid": {
     "id": "tconstruct:sky_slime",
     "amount": 15

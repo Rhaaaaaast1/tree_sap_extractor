@@ -6,12 +6,11 @@ package dev.rhaaaaaast1.tree_sap_extractor.compat.jade;
 import dev.rhaaaaaast1.tree_sap_extractor.ModRegistry;
 import dev.rhaaaaaast1.tree_sap_extractor.block.FluidBasinBlock;
 import dev.rhaaaaaast1.tree_sap_extractor.block.SapExtractorBlock;
-import dev.rhaaaaaast1.tree_sap_extractor.blockentity.FluidBasinBlockEntity;
 import dev.rhaaaaaast1.tree_sap_extractor.blockentity.SapExtractorBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.fluids.FluidStack;
+import net.minecraft.world.level.block.state.BlockState;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.IServerDataProvider;
@@ -19,15 +18,14 @@ import snownee.jade.api.ITooltip;
 import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.IWailaCommonRegistration;
 import snownee.jade.api.IWailaPlugin;
-import snownee.jade.api.JadeIds;
 import snownee.jade.api.WailaPlugin;
 import snownee.jade.api.config.IPluginConfig;
-import snownee.jade.api.fluid.JadeFluidObject;
-import snownee.jade.api.ui.IElementHelper;
 @WailaPlugin
 public class SapExtractorJadePlugin implements IWailaPlugin {
     public static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ModRegistry.MODID, "sap_extractor");
+    public static final ResourceLocation BASIN_UID =
+            ResourceLocation.fromNamespaceAndPath(ModRegistry.MODID, "fluid_basin");
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(ServerData.INSTANCE, SapExtractorBlockEntity.class);
@@ -48,6 +46,7 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
             tag.putBoolean("ValidTree", extractor.isValidTree());
             tag.putBoolean("HasContainer", extractor.hasContainer());
             tag.putBoolean("ContainerFull", extractor.isContainerFull());
+            tag.putBoolean("ContainerMismatch", extractor.isContainerMismatch());
             tag.putBoolean("Working", extractor.isWorking());
         }
         @Override
@@ -63,6 +62,7 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
             boolean open = data.getBoolean("Open");
             boolean validTree = data.getBoolean("ValidTree");
             boolean hasContainer = data.getBoolean("HasContainer");
+            boolean mismatch = data.getBoolean("ContainerMismatch");
             boolean full = data.getBoolean("ContainerFull");
             boolean working = data.getBoolean("Working");
             Component status;
@@ -72,6 +72,8 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
                 status = Component.translatable("jade.sap_extractor.status.no_tree");
             } else if (!hasContainer) {
                 status = Component.translatable("jade.sap_extractor.status.no_container");
+            } else if (mismatch) {
+                status = Component.translatable("jade.sap_extractor.status.mismatch");
             } else if (full) {
                 status = Component.translatable("jade.sap_extractor.status.full");
             } else if (working) {
@@ -79,7 +81,7 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
             } else {
                 status = Component.translatable("jade.sap_extractor.status.idle");
             }
-            tooltip.add(Component.translatable("jade.sap_extractor.status", status));
+            tooltip.add(status);
         }
         @Override
         public ResourceLocation getUid() {
@@ -91,40 +93,26 @@ public class SapExtractorJadePlugin implements IWailaPlugin {
         }
     }
     /**
-     * 中文：流体盆使用窄的流体图标 + 一行文字，替代 Jade 默认的宽流体槽。
-     * English: Use a narrow fluid icon plus one text line instead of Jade's wide universal tank.
+     * 细雪不是流体，流体盆只用方块状态记录它，Jade 的通用流体槽因此显示为空。
+     * Powder snow is not a fluid and only lives in the block state, so the generic fluid
+     * tank renders empty; this component adds the single exception line.
      */
     public enum BasinComponent implements IBlockComponentProvider {
         INSTANCE;
-        private static final ResourceLocation BASIN_UID =
-                ResourceLocation.fromNamespaceAndPath(ModRegistry.MODID, "fluid_basin");
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-            tooltip.remove(JadeIds.UNIVERSAL_FLUID_STORAGE);
-            if (!(accessor.getBlockEntity() instanceof FluidBasinBlockEntity basin)) {
+            BlockState state = accessor.getBlockState();
+            if (!state.hasProperty(FluidBasinBlock.POWDER_SNOW)) {
                 return;
             }
-            if (basin.hasPowderSnow()) {
-                tooltip.add(Component.translatable("jade.sap_extractor.powder_snow"));
+            if (!state.getValue(FluidBasinBlock.POWDER_SNOW)) {
                 return;
             }
-            FluidStack fluid = basin.getTank().getFluid();
-            if (fluid.isEmpty()) {
-                tooltip.add(Component.translatable("jade.sap_extractor.empty"));
-                return;
-            }
-            tooltip.add(IElementHelper.get().fluid(JadeFluidObject.of(
-                    fluid.getFluid(), fluid.getAmount(), fluid.getComponentsPatch())));
-            tooltip.add(Component.translatable("jade.sap_extractor.fluid",
-                    fluid.getHoverName(), fluid.getAmount(), basin.getTank().getCapacity()));
+            tooltip.add(Component.translatable("jade.sap_extractor.powder_snow"));
         }
         @Override
         public ResourceLocation getUid() {
             return BASIN_UID;
-        }
-        @Override
-        public boolean isRequired() {
-            return true;
         }
     }
 }

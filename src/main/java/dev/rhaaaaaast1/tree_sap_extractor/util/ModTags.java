@@ -16,6 +16,8 @@ public final class ModTags {
         public static final TagKey<Block> TREE_SOIL = key("tree_soil");
         /** Blocks accepted as the trunk the extractor is attached to. */
         public static final TagKey<Block> TREE_LOGS = key("tree_logs");
+        /** Root blocks that may sit between the trunk bottom and the soil. */
+        public static final TagKey<Block> TREE_ROOTS = key("tree_roots");
         private static TagKey<Block> key(String path) {
             return TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(ModRegistry.MODID, path));
         }

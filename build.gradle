@@ -95,6 +95,7 @@ dependencies {
     // the corresponding mod is present, so these are not runtime requirements.
     compileOnly files("libs/Jade-1.21.1-NeoForge-15.10.6.jar")
     compileOnly files("libs/jei-1.21.1-neoforge-19.57.0.449.jar")
+    compileOnly files("libs/create-1.21.1-6.0.10.jar")
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

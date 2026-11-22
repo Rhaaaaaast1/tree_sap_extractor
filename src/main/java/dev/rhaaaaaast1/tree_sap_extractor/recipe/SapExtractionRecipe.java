@@ -7,6 +7,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.rhaaaaaast1.tree_sap_extractor.util.ModTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -41,6 +42,8 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
             BlockKey.CODEC.fieldOf("log").forGetter(SapExtractionRecipe::log),
             BlockKey.CODEC.optionalFieldOf("leaves", BlockKey.ofTag(BlockTags.LEAVES))
                     .forGetter(SapExtractionRecipe::leaves),
+            BlockKey.CODEC.optionalFieldOf("soil", BlockKey.ofTag(ModTags.Blocks.TREE_SOIL))
+                    .forGetter(SapExtractionRecipe::soil),
             FLUID_CODEC.fieldOf("fluid").forGetter(SapExtractionRecipe::fluid),
             Codec.INT.optionalFieldOf("time", 500).forGetter(SapExtractionRecipe::time),
             Codec.INT.optionalFieldOf("min_height", 3).forGetter(SapExtractionRecipe::minHeight),
@@ -54,6 +57,7 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
                     (buffer, recipe) -> {
                         buffer.writeUtf(recipe.log.serializeKey());
                         buffer.writeUtf(recipe.leaves.serializeKey());
+                        buffer.writeUtf(recipe.soil.serializeKey());
                         FluidStack.STREAM_CODEC.encode(buffer, recipe.fluid);
                         buffer.writeVarInt(recipe.time);
                         buffer.writeVarInt(recipe.minHeight);
@@ -65,6 +69,7 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
                     buffer -> new SapExtractionRecipe(
                             BlockKey.parseOrAir(buffer.readUtf()),
                             BlockKey.parseOrAir(buffer.readUtf()),
+                            BlockKey.parseOrAir(buffer.readUtf()),
                             FluidStack.STREAM_CODEC.decode(buffer),
                             buffer.readVarInt(),
                             buffer.readVarInt(),
@@ -74,6 +79,7 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
                             buffer.readVarInt()));
     private final BlockKey log;
     private final BlockKey leaves;
+    private final BlockKey soil;
     private final FluidStack fluid;
     private final int time;
     private final int minHeight;
@@ -81,10 +87,11 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
     private final int minLeaves;
     private final int maxLeaves;
     private final int priority;
-    public SapExtractionRecipe(BlockKey log, BlockKey leaves, FluidStack fluid, int time,
+    public SapExtractionRecipe(BlockKey log, BlockKey leaves, BlockKey soil, FluidStack fluid, int time,
                                int minHeight, int maxHeight, int minLeaves, int maxLeaves, int priority) {
         this.log = log;
         this.leaves = leaves;
+        this.soil = soil;
         this.fluid = fluid.copy();
         this.time = Math.max(1, time);
         this.minHeight = Math.max(1, minHeight);
@@ -98,6 +105,9 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
     }
     public BlockKey leaves() {
         return leaves;
+    }
+    public BlockKey soil() {
+        return soil;
     }
     public FluidStack fluid() {
         return fluid;

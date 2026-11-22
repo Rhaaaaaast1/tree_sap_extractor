@@ -1,0 +1,16 @@
+{
+  "values": [
+    {
+      "id": "#tconstruct:slimy_soil",
+      "required": false
+    },
+    {
+      "id": "#tconstruct:slimy_nylium",
+      "required": false
+    },
+    {
+      "id": "#tconstruct:slimy_grass",
+      "required": false
+    }
+  ]
+}

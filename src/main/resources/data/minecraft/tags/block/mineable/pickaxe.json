@@ -2,6 +2,9 @@
   "values": [
     "sap_extractor:sap_extractor",
     "sap_extractor:fluid_basin",
-    "sap_extractor:vulcanized_rubber_block"
+    "sap_extractor:rubber_block",
+    "sap_extractor:vulcanized_rubber_block",
+    "sap_extractor:tree_sap",
+    "sap_extractor:latex"
   ]
 }

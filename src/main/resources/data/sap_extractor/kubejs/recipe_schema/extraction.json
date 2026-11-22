@@ -12,6 +12,12 @@
       "optional": "#minecraft:leaves"
     },
     {
+      "name": "soil",
+      "role": "input",
+      "type": "string",
+      "optional": "#sap_extractor:tree_soil"
+    },
+    {
       "name": "fluid",
       "role": "output",
       "type": "fluid_stack"

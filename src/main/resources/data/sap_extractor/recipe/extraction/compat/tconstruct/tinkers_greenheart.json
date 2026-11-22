@@ -8,6 +8,7 @@
   "type": "sap_extractor:extraction",
   "log": "tconstruct:greenheart_log",
   "leaves": "tconstruct:earth_slime_leaves",
+  "soil": "#sap_extractor:tconstruct_soil",
   "fluid": {
     "id": "tconstruct:earth_slime",
     "amount": 15

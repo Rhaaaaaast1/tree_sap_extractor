@@ -15,6 +15,7 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.Level;
 import java.util.List;
 @JeiPlugin
 public class SapExtractorJeiPlugin implements IModPlugin {
@@ -30,16 +31,15 @@ public class SapExtractorJeiPlugin implements IModPlugin {
     }
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
-        if (Minecraft.getInstance().level == null) {
+        Level level = Minecraft.getInstance().level;
+        if (level == null) {
             return;
         }
-        List<SapExtractionRecipe> recipes = Minecraft.getInstance().level.getRecipeManager()
+        // 数据包里有几条就展示几条，不做任何筛选，回退配方也由自身字段说明适用范围。
+        List<SapExtractionRecipe> recipes = level.getRecipeManager()
                 .getAllRecipesFor(ModRecipes.EXTRACTION_TYPE.get())
                 .stream()
                 .map(RecipeHolder::value)
-                .filter(recipe -> recipe.log().tag()
-                        .map(tag -> !tag.location().equals(ResourceLocation.withDefaultNamespace("logs")))
-                        .orElse(true))
                 .toList();
         registration.addRecipes(ExtractionRecipeCategory.TYPE, recipes);
     }

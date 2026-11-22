@@ -8,12 +8,13 @@
   "type": "sap_extractor:extraction",
   "log": "tconstruct:enderbark_log",
   "leaves": "tconstruct:ender_slime_leaves",
+  "soil": "#sap_extractor:tconstruct_soil",
   "fluid": {
     "id": "tconstruct:ender_slime",
     "amount": 15
   },
   "time": 500,
-  "min_height": 3,
+  "min_height": 2,
   "max_height": 16,
   "min_leaves": 3,
   "max_leaves": 24,

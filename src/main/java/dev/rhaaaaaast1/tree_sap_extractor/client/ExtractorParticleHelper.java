@@ -37,5 +37,6 @@ public final class ExtractorParticleHelper {
         double x = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.05;
         double y = pos.getY() + 0.45;
         double z = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.05;
-        clientLevel.addParticle(new TintedHoneyDripParticleOptions(tint), x, y, z, 0.0, -0.015, 0.0);    }
+        clientLevel.addParticle(new TintedHoneyDripParticleOptions(tint), x, y, z, 0.0, -0.015, 0.0);
+    }
 }

@@ -16,6 +16,7 @@ import mezz.jei.api.recipe.category.AbstractRecipeCategory;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import java.util.ArrayList;
 import java.util.List;
 public class ExtractionRecipeCategory extends AbstractRecipeCategory<SapExtractionRecipe> {
     public static final RecipeType<SapExtractionRecipe> TYPE =
@@ -28,24 +29,31 @@ public class ExtractionRecipeCategory extends AbstractRecipeCategory<SapExtracti
     }
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, SapExtractionRecipe recipe, IFocusGroup focuses) {
-        ItemStack leaf = firstStack(recipe.leaves().blocks().toList());
-        ItemStack log = firstStack(recipe.log().blocks().toList());
-        builder.addInputSlot(8, 8).addItemStack(leaf);
-        builder.addInputSlot(28, 8).addItemStack(leaf);
-        builder.addInputSlot(48, 8).addItemStack(leaf);
-        builder.addInputSlot(28, 28).addItemStack(log);
-        builder.addInputSlot(28, 48).addItemStack(log);
+        List<Block> leaves = recipe.leaves().blocks().toList();
+        List<Block> logs = recipe.log().blocks().toList();
+        addItemSlot(builder, 8, 8, leaves);
+        addItemSlot(builder, 28, 8, leaves);
+        addItemSlot(builder, 48, 8, leaves);
+        addItemSlot(builder, 28, 28, logs);
+        addItemSlot(builder, 28, 48, logs);
         builder.addOutputSlot(88, 28)
                 .addFluidStack(recipe.fluid().getFluid(), recipe.fluid().getAmount())
                 .setCustomRenderer(NeoForgeTypes.FLUID_STACK, FluidIconRenderer.INSTANCE);
     }
-    private static ItemStack firstStack(List<Block> blocks) {
+    /**
+     * 把数据包给出的方块全部塞进同一个槽位。标签有多个成员时 JEI 会在槽内轮换，
+     * 不会只显示第一个方块，也不会因为标签为空而注册空槽导致界面报错。
+     */
+    private static void addItemSlot(IRecipeLayoutBuilder builder, int x, int y, List<Block> blocks) {
+        List<ItemStack> stacks = new ArrayList<>();
         for (Block block : blocks) {
             ItemStack stack = new ItemStack(block);
             if (!stack.isEmpty()) {
-                return stack;
+                stacks.add(stack);
             }
         }
-        return ItemStack.EMPTY;
+        if (!stacks.isEmpty()) {
+            builder.addInputSlot(x, y).addItemStacks(stacks);
+        }
     }
 }

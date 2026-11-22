@@ -5,6 +5,7 @@ package dev.rhaaaaaast1.tree_sap_extractor.blockentity;
  */
 import dev.rhaaaaaast1.tree_sap_extractor.block.SapExtractorBlock;
 import dev.rhaaaaaast1.tree_sap_extractor.recipe.SapExtractionRecipe;
+import dev.rhaaaaaast1.tree_sap_extractor.util.ModTags;
 import dev.rhaaaaaast1.tree_sap_extractor.util.SapExtractionRules;
 import dev.rhaaaaaast1.tree_sap_extractor.util.SapExtractionRules.TreeInfo;
 import net.minecraft.core.BlockPos;
@@ -38,17 +39,27 @@ public class SapExtractorBlockEntity extends BlockEntity {
      * - productionAccumulator splits the cycle into small per-tick outputs.
      */
     private static final int CONTAINER_REFRESH_INTERVAL = 40;
+    private static final int TREE_RESCAN_DELAY = 10;
     private static final int DEFAULT_CYCLE = 500;
     private int productionAccumulator;
     private int cycleTime = DEFAULT_CYCLE;
     private int containerRefreshCooldown;
+    private int treeRescanDelay;
     private boolean treeDirty = true;
     private boolean validTree;
     private boolean hasContainer;
     private boolean containerFull;
+    private boolean containerMismatch;
+    // 上一 tick 的红石电平，只用于识别电平变化，不参与停机判定。
+    // Last tick's redstone level, used only to detect a level change.
+    private boolean powered;
     private boolean working;
     @Nullable
     private ResourceLocation recipeId;
+    @Nullable
+    private IFluidHandler containerHandler;
+    @Nullable
+    private BlockState containerState;
     private FluidStack output = FluidStack.EMPTY;
     public SapExtractorBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.SAP_EXTRACTOR.get(), pos, state);
@@ -59,20 +70,34 @@ public class SapExtractorBlockEntity extends BlockEntity {
         if (level == null || level.isClientSide) {
             return;
         }
-        // 只有树/容器变化时重新扫描树，避免每 tick 做 3×40×3 的方块读取。
-        // Re-scan the tree only when needed instead of reading a 3×40×3 area every tick.
+        // 只有树/容器变化时重新扫描树，并且延迟到方块更新安静下来之后，避免树叶衰减这类高频更新反复触发全量遍历。
+        // Re-scan only after block updates settle down, so leaf decay cannot trigger a full walk every tick.
         if (treeDirty) {
-            refreshTree();
-            treeDirty = false;
+            if (treeRescanDelay > 0) {
+                treeRescanDelay--;
+            } else {
+                refreshTree();
+                treeDirty = false;
+            }
         }
         if (--containerRefreshCooldown <= 0) {
             refreshContainer();
             containerRefreshCooldown = CONTAINER_REFRESH_INTERVAL;
         }
+        // 红石电平每变化一次就翻转一次开关，电平保持期间不再干预，手动右键照样生效。
+        // Each redstone level change flips the switch once; a steady level never overrides the manual toggle.
+        boolean nowPowered = level.hasNeighborSignal(worldPosition);
+        if (nowPowered != powered) {
+            BlockState current = getBlockState();
+            boolean open = current.getValue(SapExtractorBlock.OPEN);
+            level.setBlock(worldPosition, current.setValue(SapExtractorBlock.OPEN, !open), Block.UPDATE_ALL);
+        }
+        powered = nowPowered;
         boolean canRun = getBlockState().getValue(SapExtractorBlock.OPEN)
                 && validTree
                 && hasContainer
                 && !containerFull
+                && !containerMismatch
                 && recipeId != null
                 && !output.isEmpty();
         working = false;
@@ -102,21 +127,31 @@ public class SapExtractorBlockEntity extends BlockEntity {
     }
     public void invalidateTree() {
         treeDirty = true;
+        treeRescanDelay = TREE_RESCAN_DELAY;
         containerRefreshCooldown = 0;
     }
     private void refreshContainer() {
-        hasContainer = SapExtractionRules.hasContainer(level, worldPosition);
-        if (!hasContainer) {
-            containerFull = false;
+        if (level == null) {
             return;
         }
-        // 容器满时每 40 tick 探测 1 mB 空间；有空间才恢复工作。
-        if (containerFull && level != null) {
-            IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK,
-                    worldPosition.below(), Direction.UP);
-            if (handler != null && handler.fill(new FluidStack(output.getFluid(), 1),
+        BlockState belowState = level.getBlockState(worldPosition.below());
+        containerState = belowState;
+        containerHandler = belowState.is(ModTags.Blocks.CONTAINERS)
+                ? level.getCapability(Capabilities.FluidHandler.BLOCK, worldPosition.below(), Direction.UP)
+                : null;
+        hasContainer = containerHandler != null;
+        if (!hasContainer) {
+            containerFull = false;
+            containerMismatch = false;
+            return;
+        }
+        // 容器满时每 40 tick 探测 1 mB 空间；有空间才恢复工作。产出为空时跳过，避免用空流体构造探测栈。
+        // Probe for 1 mB of room every 40 ticks while full; skip when there is no output fluid.
+        if (containerFull && !output.isEmpty()) {
+            if (containerHandler.fill(new FluidStack(output.getFluid(), 1),
                     IFluidHandler.FluidAction.SIMULATE) > 0) {
                 containerFull = false;
+                containerMismatch = false;
             }
         }
     }
@@ -126,22 +161,54 @@ public class SapExtractorBlockEntity extends BlockEntity {
         if (level == null) {
             return 0;
         }
-        IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK,
-                worldPosition.below(), Direction.UP);
+        IFluidHandler handler = getContainerHandler();
         if (handler == null) {
             hasContainer = false;
             containerFull = false;
+            containerMismatch = false;
             return 0;
         }
         FluidStack toInsert = output.copyWithAmount(amount);
         int accepted = handler.fill(toInsert, IFluidHandler.FluidAction.SIMULATE);
         if (accepted <= 0) {
-            containerFull = true;
+            // 装的是别的流体时 fill 同样返回 0，这里要和"已经装满"分开，否则 Jade 会误报容器满。
+            // A different fluid also returns 0 here; keep it separate from a full container.
+            containerMismatch = isFluidMismatch(handler);
+            containerFull = !containerMismatch;
             return 0;
         }
+        containerMismatch = false;
         handler.fill(toInsert.copyWithAmount(accepted), IFluidHandler.FluidAction.EXECUTE);
         containerFull = handler.fill(toInsert.copyWithAmount(1), IFluidHandler.FluidAction.SIMULATE) <= 0;
         return accepted;
+    }
+    /**
+     * Reuse the cached fluid handler while the block below keeps the same state.
+     * A state change means the container was replaced, so the capability is looked up again.
+     */
+    @Nullable
+    private IFluidHandler getContainerHandler() {
+        if (level == null) {
+            return null;
+        }
+        BlockState belowState = level.getBlockState(worldPosition.below());
+        if (containerHandler == null || !belowState.equals(containerState)) {
+            containerState = belowState;
+            containerHandler = belowState.is(ModTags.Blocks.CONTAINERS)
+                    ? level.getCapability(Capabilities.FluidHandler.BLOCK, worldPosition.below(), Direction.UP)
+                    : null;
+            hasContainer = containerHandler != null;
+        }
+        return containerHandler;
+    }
+    private boolean isFluidMismatch(IFluidHandler handler) {
+        for (int i = 0; i < handler.getTanks(); i++) {
+            FluidStack stack = handler.getFluidInTank(i);
+            if (!stack.isEmpty()) {
+                return !stack.is(output.getFluid());
+            }
+        }
+        return false;
     }
     private void refreshTree() {
         // 重新匹配配方并缓存树根、原木数、树叶数；这里不操作容器。
@@ -180,8 +247,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
             setChanged();
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
-        hasContainer = SapExtractionRules.hasContainer(level, worldPosition);
-        containerFull = false;
+        refreshContainer();
         containerRefreshCooldown = CONTAINER_REFRESH_INTERVAL;
         productionAccumulator = 0;
     }
@@ -203,9 +269,6 @@ public class SapExtractorBlockEntity extends BlockEntity {
         }
         return count;
     }
-    public int getProgress() {
-        return productionAccumulator;
-    }
     public int getCycleTime() {
         return Math.max(1, cycleTime);
     }
@@ -217,6 +280,9 @@ public class SapExtractorBlockEntity extends BlockEntity {
     }
     public boolean isContainerFull() {
         return containerFull;
+    }
+    public boolean isContainerMismatch() {
+        return containerMismatch;
     }
     public boolean isWorking() {
         return working;
@@ -233,6 +299,9 @@ public class SapExtractorBlockEntity extends BlockEntity {
         super.saveAdditional(tag, registries);
         tag.putInt("Progress", productionAccumulator);
         tag.putInt("CycleTime", cycleTime);
+        // 存档上一 tick 的电平，避免重载世界时把仍在通电的信号当成新一次变化而翻转开关。
+        // Store the last level so reloading a still-powered setup does not count as a new change.
+        tag.putBoolean("Powered", powered);
         if (recipeId != null) {
             tag.putString("Recipe", recipeId.toString());
         }
@@ -245,6 +314,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
         super.loadAdditional(tag, registries);
         productionAccumulator = tag.getInt("Progress");
         cycleTime = Math.max(1, tag.getInt("CycleTime"));
+        powered = tag.getBoolean("Powered");
         if (tag.contains("Recipe")) {
             recipeId = ResourceLocation.tryParse(tag.getString("Recipe"));
         }

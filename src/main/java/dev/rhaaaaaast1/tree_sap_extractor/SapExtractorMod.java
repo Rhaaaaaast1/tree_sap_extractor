@@ -11,6 +11,7 @@ import dev.rhaaaaaast1.tree_sap_extractor.fluid.ModFluids;
 import dev.rhaaaaaast1.tree_sap_extractor.item.ModItems;
 import dev.rhaaaaaast1.tree_sap_extractor.particle.ModParticles;
 import dev.rhaaaaaast1.tree_sap_extractor.recipe.ModRecipes;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -24,6 +25,9 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.slf4j.Logger;
 /**
  * 模组入口：按依赖顺序初始化注册表、配方、粒子、配置和事件。
@@ -32,6 +36,7 @@ import org.slf4j.Logger;
 @Mod(ModRegistry.MODID)
 public class SapExtractorMod {
     public static final Logger LOGGER = LogUtils.getLogger();
+    private static final int BOTTLE_AMOUNT = 250;
     public SapExtractorMod(IEventBus modEventBus, ModContainer modContainer) {
         // 先初始化依赖其他注册项的类，再统一注册，避免流体桶/方块引用顺序错误。
         // Initialize holders first, then register them in a safe dependency order.
@@ -91,5 +96,37 @@ public class SapExtractorMod {
                 player.drop(bottle, false);
             }
         }
+    }
+    @SubscribeEvent
+    public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        // 玻璃瓶右键任何装有树汁的容器都能装瓶，和原版玻璃瓶装水炼药锅的操作对称。
+        // A glass bottle fills from any container holding tree sap, mirroring the water cauldron interaction.
+        if (event.getLevel().isClientSide()) {
+            return;
+        }
+        ItemStack stack = event.getItemStack();
+        if (!stack.is(Items.GLASS_BOTTLE) || event.getFace() == null) {
+            return;
+        }
+        Direction face = event.getFace();
+        IFluidHandler handler = event.getLevel().getCapability(Capabilities.FluidHandler.BLOCK,
+                event.getPos(), face);
+        if (handler == null) {
+            return;
+        }
+        FluidStack drained = handler.drain(new FluidStack(ModFluids.TREE_SAP.get(), BOTTLE_AMOUNT),
+                IFluidHandler.FluidAction.SIMULATE);
+        if (!drained.is(ModFluids.TREE_SAP.get()) || drained.getAmount() < BOTTLE_AMOUNT) {
+            return;
+        }
+        handler.drain(new FluidStack(ModFluids.TREE_SAP.get(), BOTTLE_AMOUNT),
+                IFluidHandler.FluidAction.EXECUTE);
+        Player player = event.getEntity();
+        stack.consume(1, player);
+        ItemStack bottle = new ItemStack(ModItems.TREE_SAP_BOTTLE.get());
+        if (!player.getInventory().add(bottle)) {
+            player.drop(bottle, false);
+        }
+        event.setCanceled(true);
     }
 }
