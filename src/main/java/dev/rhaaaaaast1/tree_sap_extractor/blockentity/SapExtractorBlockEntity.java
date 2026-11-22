@@ -68,6 +68,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
         working = false;
         if (canRun) {
             working = true;
+            // 每个 tick 先记产量，再按周期拆成 1 mB 输出，避免等满 500 tick 才突然出现一大团流体。
             productionAccumulator += output.getAmount();
             int produced = productionAccumulator / cycleTime;
             if (produced > 0) {
@@ -76,6 +77,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
                     productionAccumulator -= accepted * cycleTime;
                     setChanged();
                 } else {
+                    // 容器满了就不再积累，防止拆掉容器再放回时瞬间吐出一大批。
                     productionAccumulator = 0;
                     working = false;
                 }
@@ -101,6 +103,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
             containerFull = false;
             return;
         }
+        // 容器满时每 40 tick 探测 1 mB 空间；有空间才恢复工作。
         if (containerFull && level != null) {
             IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK,
                     worldPosition.below(), Direction.UP);
@@ -182,6 +185,7 @@ public class SapExtractorBlockEntity extends BlockEntity {
         if (level == null) {
             return 0;
         }
+        // 只统计树根四个水平相邻的采集器，和 Thermal 1.20 的减速逻辑一致。
         Block extractor = getBlockState().getBlock();
         int count = 0;
         for (Direction direction : Direction.Plane.HORIZONTAL) {

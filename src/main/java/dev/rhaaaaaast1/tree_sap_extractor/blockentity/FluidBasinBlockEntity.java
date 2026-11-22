@@ -74,6 +74,7 @@ public class FluidBasinBlockEntity extends BlockEntity {
             powderSnowHeatTicks = 0;
             return;
         }
+        // 只有细雪需要检查热源，普通流体不会进入下面的扫描。
         if (!hasHeatSource()) {
             powderSnowHeatTicks = 0;
             return;
@@ -118,6 +119,7 @@ public class FluidBasinBlockEntity extends BlockEntity {
     }
 
     private void meltPowderSnow() {
+        // 细雪不是流体，所以这里直接把内容换成 1000 mB 水，再让 BER 画水。
         powderSnow = false;
         powderSnowHeatTicks = 0;
         tank.setFluid(new FluidStack(Fluids.WATER, tank.getCapacity()));

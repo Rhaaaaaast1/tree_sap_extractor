@@ -104,8 +104,10 @@ public class FluidBasinBlock extends AbstractCauldronBlock implements EntityBloc
             return;
         }
         if (fluid.is(Fluids.WATER)) {
+            // 水盆灭火，和原版水炼药锅保持一致。
             entity.clearFire();
         } else if (fluid.is(Fluids.LAVA)) {
+            // 熔岩盆会持续伤害并点燃实体。
             entity.hurt(level.damageSources().lava(), 4.0F);
             entity.setRemainingFireTicks(Math.max(entity.getRemainingFireTicks(), 300));
         }
