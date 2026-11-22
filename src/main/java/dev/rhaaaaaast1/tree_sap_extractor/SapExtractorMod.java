@@ -1,5 +1,6 @@
 package dev.rhaaaaaast1.tree_sap_extractor;
 
+// Fuck Mojang: so many bugs, and still such low productivity.
 import com.mojang.logging.LogUtils;
 import dev.rhaaaaaast1.tree_sap_extractor.block.ModBlocks;
 import dev.rhaaaaaast1.tree_sap_extractor.blockentity.ModBlockEntities;
