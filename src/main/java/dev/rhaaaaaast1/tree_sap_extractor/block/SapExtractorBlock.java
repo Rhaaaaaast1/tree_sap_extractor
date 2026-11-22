@@ -1,5 +1,6 @@
 package dev.rhaaaaaast1.tree_sap_extractor.block;
 
+import dev.rhaaaaaast1.tree_sap_extractor.ClientConfig;
 import dev.rhaaaaaast1.tree_sap_extractor.blockentity.SapExtractorBlockEntity;
 import dev.rhaaaaaast1.tree_sap_extractor.client.ExtractorParticleHelper;
 import dev.rhaaaaaast1.tree_sap_extractor.util.ModTags;
@@ -195,7 +196,7 @@ public class SapExtractorBlock extends HorizontalDirectionalBlock implements Ent
 
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
-        if (!state.getValue(ACTIVE)) {
+        if (!state.getValue(ACTIVE) || !ClientConfig.enableParticles) {
             return;
         }
         if (random.nextInt(4) == 0

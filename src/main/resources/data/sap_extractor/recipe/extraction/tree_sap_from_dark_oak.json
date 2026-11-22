@@ -1,0 +1,8 @@
+{
+  "type": "sap_extractor:extraction",
+  "log": "#minecraft:dark_oak_logs",
+  "leaves": "minecraft:dark_oak_leaves",
+  "fluid": { "id": "sap_extractor:tree_sap", "amount": 1 },
+  "time": 10,
+  "priority": 100
+}

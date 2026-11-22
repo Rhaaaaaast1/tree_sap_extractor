@@ -1,0 +1,8 @@
+{
+  "type": "sap_extractor:extraction",
+  "log": "#minecraft:birch_logs",
+  "leaves": "minecraft:birch_leaves",
+  "fluid": { "id": "sap_extractor:tree_sap", "amount": 1 },
+  "time": 10,
+  "priority": 100
+}

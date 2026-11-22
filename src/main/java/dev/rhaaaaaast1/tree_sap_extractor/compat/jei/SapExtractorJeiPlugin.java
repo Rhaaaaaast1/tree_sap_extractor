@@ -39,6 +39,9 @@ public class SapExtractorJeiPlugin implements IModPlugin {
                 .getAllRecipesFor(ModRecipes.EXTRACTION_TYPE.get())
                 .stream()
                 .map(RecipeHolder::value)
+                .filter(recipe -> recipe.log().tag()
+                        .map(tag -> !tag.location().equals(ResourceLocation.withDefaultNamespace("logs")))
+                        .orElse(true))
                 .toList();
         registration.addRecipes(ExtractionRecipeCategory.TYPE, recipes);
     }

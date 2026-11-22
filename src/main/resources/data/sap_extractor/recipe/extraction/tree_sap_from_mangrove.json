@@ -1,0 +1,8 @@
+{
+  "type": "sap_extractor:extraction",
+  "log": "#minecraft:mangrove_logs",
+  "leaves": "minecraft:mangrove_leaves",
+  "fluid": { "id": "sap_extractor:tree_sap", "amount": 1 },
+  "time": 10,
+  "priority": 100
+}
