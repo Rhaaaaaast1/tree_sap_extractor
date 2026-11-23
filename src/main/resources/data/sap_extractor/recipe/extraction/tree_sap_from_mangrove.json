@@ -2,6 +2,7 @@
   "type": "sap_extractor:extraction",
   "log": "minecraft:mangrove_log",
   "leaves": "minecraft:mangrove_leaves",
+  "soil": "#sap_extractor:tree_soil",
   "fluid": {
     "id": "sap_extractor:tree_sap",
     "amount": 15
@@ -10,6 +11,5 @@
   "min_height": 2,
   "max_height": 16,
   "min_leaves": 3,
-  "max_leaves": 24,
-  "priority": 100
+  "max_leaves": 24
 }

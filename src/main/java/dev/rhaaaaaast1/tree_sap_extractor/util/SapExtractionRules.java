@@ -43,10 +43,7 @@ public final class SapExtractionRules {
     public static TreeInfo findTree(Level level, BlockPos attachedLog) {
         List<RecipeHolder<SapExtractionRecipe>> candidates = new ArrayList<>(
                 level.getRecipeManager().getAllRecipesFor(ModRecipes.EXTRACTION_TYPE.get()));
-        candidates.sort(Comparator
-                .comparingInt((RecipeHolder<SapExtractionRecipe> holder) -> holder.value().priority())
-                .reversed()
-                .thenComparing(holder -> holder.id().toString()));
+        candidates.sort(Comparator.comparing(holder -> holder.id().toString()));
         BlockState attachedState = level.getBlockState(attachedLog);
         for (RecipeHolder<SapExtractionRecipe> holder : candidates) {
             if (!holder.value().log().matches(attachedState)) {

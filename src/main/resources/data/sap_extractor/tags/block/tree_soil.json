@@ -2,17 +2,10 @@
   "values": [
     "#minecraft:dirt",
     "#c:stones",
-    "minecraft:stone",
-    "minecraft:granite",
-    "minecraft:diorite",
-    "minecraft:andesite",
-    "minecraft:deepslate",
-    "minecraft:tuff",
+    "#c:sands",
+    "#c:gravels",
     "minecraft:mud",
     "minecraft:muddy_mangrove_roots",
-    "minecraft:sand",
-    "minecraft:red_sand",
-    "minecraft:gravel",
     "minecraft:suspicious_sand",
     "minecraft:suspicious_gravel"
   ]

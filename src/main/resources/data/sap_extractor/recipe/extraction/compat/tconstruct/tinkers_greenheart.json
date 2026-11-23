@@ -17,6 +17,5 @@
   "min_height": 3,
   "max_height": 16,
   "min_leaves": 3,
-  "max_leaves": 24,
-  "priority": 100
+  "max_leaves": 24
 }

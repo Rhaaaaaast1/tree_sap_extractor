@@ -7,12 +7,10 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.rhaaaaaast1.tree_sap_extractor.util.ModTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeInput;
@@ -22,35 +20,37 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.fluids.FluidStack;
 import java.util.function.Function;
 /**
- * Data-driven extraction mapping: a trunk block (or tag) + optional leaf tag
- * produces a fluid over a number of ticks. Higher priority recipes win.
+ * Data-driven extraction mapping: a trunk block (or tag), a leaf block (or tag)
+ * and a soil tag produce a fluid over a number of ticks.
  */
 public class SapExtractionRecipe implements Recipe<RecipeInput> {
     /**
      * Accept both the 1.21.1 FluidStack form ({@code {"id": "...", "amount": n}})
-     * and the KubeJS {@code fluid_stack} form ({@code {"fluid": "...", "amount": n}}).
+     * and the older {@code {"fluid": "...", "amount": n}} form.
      */
     private static final Codec<FluidStack> LEGACY_FLUID_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             BuiltInRegistries.FLUID.byNameCodec().fieldOf("fluid").forGetter(FluidStack::getFluid),
-            Codec.INT.optionalFieldOf("amount", 1000).forGetter(FluidStack::getAmount)
+            Codec.INT.fieldOf("amount").forGetter(FluidStack::getAmount)
     ).apply(instance, FluidStack::new));
     private static final Codec<FluidStack> FLUID_CODEC =
             Codec.either(FluidStack.CODEC, LEGACY_FLUID_CODEC).xmap(
                     either -> either.map(Function.identity(), Function.identity()),
                     Either::left);
+    /**
+     * Every field is mandatory. A missing match range would silently fall back
+     * to a default and change how a tree is validated, so datapacks must spell
+     * out the full set.
+     */
     public static final MapCodec<SapExtractionRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             BlockKey.CODEC.fieldOf("log").forGetter(SapExtractionRecipe::log),
-            BlockKey.CODEC.optionalFieldOf("leaves", BlockKey.ofTag(BlockTags.LEAVES))
-                    .forGetter(SapExtractionRecipe::leaves),
-            BlockKey.CODEC.optionalFieldOf("soil", BlockKey.ofTag(ModTags.Blocks.TREE_SOIL))
-                    .forGetter(SapExtractionRecipe::soil),
+            BlockKey.CODEC.fieldOf("leaves").forGetter(SapExtractionRecipe::leaves),
+            BlockKey.CODEC.fieldOf("soil").forGetter(SapExtractionRecipe::soil),
             FLUID_CODEC.fieldOf("fluid").forGetter(SapExtractionRecipe::fluid),
-            Codec.INT.optionalFieldOf("time", 500).forGetter(SapExtractionRecipe::time),
-            Codec.INT.optionalFieldOf("min_height", 3).forGetter(SapExtractionRecipe::minHeight),
-            Codec.INT.optionalFieldOf("max_height", 32).forGetter(SapExtractionRecipe::maxHeight),
-            Codec.INT.optionalFieldOf("min_leaves", 3).forGetter(SapExtractionRecipe::minLeaves),
-            Codec.INT.optionalFieldOf("max_leaves", 64).forGetter(SapExtractionRecipe::maxLeaves),
-            Codec.INT.optionalFieldOf("priority", 0).forGetter(SapExtractionRecipe::priority)
+            Codec.INT.fieldOf("time").forGetter(SapExtractionRecipe::time),
+            Codec.INT.fieldOf("min_height").forGetter(SapExtractionRecipe::minHeight),
+            Codec.INT.fieldOf("max_height").forGetter(SapExtractionRecipe::maxHeight),
+            Codec.INT.fieldOf("min_leaves").forGetter(SapExtractionRecipe::minLeaves),
+            Codec.INT.fieldOf("max_leaves").forGetter(SapExtractionRecipe::maxLeaves)
     ).apply(instance, SapExtractionRecipe::new));
     public static final StreamCodec<RegistryFriendlyByteBuf, SapExtractionRecipe> STREAM_CODEC =
             StreamCodec.of(
@@ -64,14 +64,12 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
                         buffer.writeVarInt(recipe.maxHeight);
                         buffer.writeVarInt(recipe.minLeaves);
                         buffer.writeVarInt(recipe.maxLeaves);
-                        buffer.writeVarInt(recipe.priority);
                     },
                     buffer -> new SapExtractionRecipe(
                             BlockKey.parseOrAir(buffer.readUtf()),
                             BlockKey.parseOrAir(buffer.readUtf()),
                             BlockKey.parseOrAir(buffer.readUtf()),
                             FluidStack.STREAM_CODEC.decode(buffer),
-                            buffer.readVarInt(),
                             buffer.readVarInt(),
                             buffer.readVarInt(),
                             buffer.readVarInt(),
@@ -86,9 +84,8 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
     private final int maxHeight;
     private final int minLeaves;
     private final int maxLeaves;
-    private final int priority;
     public SapExtractionRecipe(BlockKey log, BlockKey leaves, BlockKey soil, FluidStack fluid, int time,
-                               int minHeight, int maxHeight, int minLeaves, int maxLeaves, int priority) {
+                               int minHeight, int maxHeight, int minLeaves, int maxLeaves) {
         this.log = log;
         this.leaves = leaves;
         this.soil = soil;
@@ -98,7 +95,6 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
         this.maxHeight = Math.max(this.minHeight, maxHeight);
         this.minLeaves = Math.max(1, minLeaves);
         this.maxLeaves = Math.max(this.minLeaves, maxLeaves);
-        this.priority = priority;
     }
     public BlockKey log() {
         return log;
@@ -126,9 +122,6 @@ public class SapExtractionRecipe implements Recipe<RecipeInput> {
     }
     public int maxLeaves() {
         return maxLeaves;
-    }
-    public int priority() {
-        return priority;
     }
     @Override
     public boolean matches(RecipeInput input, Level level) {

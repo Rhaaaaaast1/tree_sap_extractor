@@ -6,8 +6,12 @@
     }
   ],
   "type": "sap_extractor:extraction",
-  "log": "integrateddynamics:menril_log_filled",
+  "log": [
+    "integrateddynamics:menril_log",
+    "integrateddynamics:menril_log_filled"
+  ],
   "leaves": "integrateddynamics:menril_leaves",
+  "soil": "#sap_extractor:tree_soil",
   "fluid": {
     "id": "integrateddynamics:menril_resin",
     "amount": 10
@@ -16,6 +20,5 @@
   "min_height": 3,
   "max_height": 16,
   "min_leaves": 3,
-  "max_leaves": 32,
-  "priority": 100
+  "max_leaves": 32
 }

@@ -6,13 +6,11 @@ package dev.rhaaaaaast1.tree_sap_extractor.blockentity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
@@ -145,9 +143,6 @@ public class FluidBasinBlockEntity extends BlockEntity {
         if (state.is(Blocks.FURNACE) || state.is(Blocks.BLAST_FURNACE) || state.is(Blocks.SMOKER)) {
             return state.hasProperty(AbstractFurnaceBlock.LIT) && state.getValue(AbstractFurnaceBlock.LIT) ? 200 : 0;
         }
-        if (isFarmerStoveLit(state)) {
-            return 200;
-        }
         // 机械动力未安装时不能加载它的类，先判断模组是否在场再调用兼容层。
         if (ModList.get().isLoaded("create")) {
             int createTicks = CreateHeatCompat.heatTicks(state);
@@ -156,22 +151,6 @@ public class FluidBasinBlockEntity extends BlockEntity {
             }
         }
         return 0;
-    }
-
-    private static boolean isFarmerStoveLit(BlockState state) {
-        var stove = BuiltInRegistries.BLOCK.get(
-                ResourceLocation.fromNamespaceAndPath("farmersdelight", "stove"));
-        if (stove == Blocks.AIR || !state.is(stove)) {
-            return false;
-        }
-        // 中文：农夫乐事炉灶有 lit 属性时只认点燃状态；没有属性时视为常热。
-        // English: Farmer's Delight stove uses lit when present; otherwise it is always hot.
-        for (var property : state.getProperties()) {
-            if (property.getName().equals("lit")) {
-                return state.getValue(property).toString().equalsIgnoreCase("true");
-            }
-        }
-        return true;
     }
 
     private void meltPowderSnow() {

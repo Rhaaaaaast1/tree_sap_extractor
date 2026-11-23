@@ -1,6 +1,6 @@
 # 树液采集器完整文档
 
-本文覆盖 `sap_extractor` 在 Minecraft 1.21.1 与 NeoForge 上的全部已实现行为：方块与物品、树判定、产量与输出节奏、容器交互、流体盆、数据包字段、KubeJS 写法、兼容目录约定和客户端表现。上手说明见 `README.md`，技术细节以本文为准。
+本文覆盖 `sap_extractor` 在 Minecraft 1.21.1 与 NeoForge 上的全部已实现行为：方块与物品、树判定、产量与输出节奏、容器交互、流体盆、数据包字段、兼容目录约定和客户端表现。上手说明见 `README.md`，技术细节以本文为准。
 
 ## 运行机制
 
@@ -31,11 +31,11 @@
 
 判定入口是 `SapExtractionRules.findTree(level, attachedLog)`，在树缓存失效时由方块实体调用，参数是背板方向相邻的方块位置。
 
-第一步，取出全部 `sap_extractor:extraction` 配方，按 `priority` 降序排序，`priority` 相同时按配方 id 字符串升序。
+第一步，取出全部 `sap_extractor:extraction` 配方，按配方 id 字符串升序排序，保证遍历顺序固定。
 
 第二步，跳过 `log` 不匹配所贴方块的配方，其余配方逐条执行后续步骤，第一条通过完整判定即返回，后续配方不再尝试。
 
-第三步，寻找树根。先在所贴原木正下方 0 到 3 格逐格检查，候选方块必须匹配该配方的 `log`，并且从候选方块向上数出的连续原木数要达到 `min_height`。着地判定从候选方块下方一格开始，向下最多 10 格：遇到匹配该配方 `soil` 的方块判定着地，遇到 `sap_extractor:tree_roots` 继续向下，遇到其他方块判定失败。`soil` 缺省为 `#sap_extractor:tree_soil`，匠魂四种史莱姆树显式指定 `#sap_extractor:tconstruct_soil`，因此只认黏液土壤。红树与末影皮木的树干由根生成器抬高 1 到 7 格，这一段就是靠穿透根方块解决的。
+第三步，寻找树根。先在所贴原木正下方 0 到 3 格逐格检查，候选方块必须匹配该配方的 `log`，并且从候选方块向上数出的连续原木数要达到 `min_height`。着地判定从候选方块下方一格开始，向下最多 10 格：遇到匹配该配方 `soil` 的方块判定着地，遇到 `sap_extractor:tree_roots` 继续向下，遇到其他方块判定失败。`soil` 由配方显式给出，普通树写 `#sap_extractor:tree_soil`，匠魂四种史莱姆树写 `#sap_extractor:tconstruct_soil`，因此只认黏液土壤。红树与末影皮木的树干由根生成器抬高 1 到 7 格，这一段就是靠穿透根方块解决的。
 
 第四步，竖向路径不成立时做连通搜索。从所贴原木出发沿 26 个方向遍历匹配 `log` 的方块，范围限制为水平 ±6 格、向上 40 格、向下 24 格，最多收集 256 个方块。只把每根柱子的底端当作候选，即下方不匹配 `log` 的方块，并从每个候选向上数连续原木，达不到 `min_height` 的列直接跳过。在候选中取 `y` 最小的一个作为树根。若整个连通分量里没有任何柱底满足着地判定，退化为取柱高最大的一根作为名义树根，不要求着地。红树的根柱只向下延伸有限距离，柱底下方常是水，树干本身也会被根生成器抬到空中，这条退化路径就是给这类树准备的，树是否成立最终由树叶数决定。红树与末影皮木的侧枝第一格位于主干上方一格的斜角位置，只与主干共棱，因此搜索范围必须包含 26 个方向，只判面相邻的搜索走不通。
 
@@ -96,82 +96,31 @@ cycleTime = max(1, round(time * (1 + otherExtractors * 0.5)))
 
 配方类型为 `sap_extractor:extraction`，文件放在 `data/sap_extractor/recipe/extraction/<id>.json`，配方 id 由文件路径决定，全部位于 `sap_extractor` 命名空间。
 
-| 字段 | 类型 | 默认值 | 作用 |
+| 字段 | 类型 | 是否必填 | 作用 |
 | --- | --- | --- | --- |
-| `log` | 方块 id 或 `#标签` | 必填 | 采集器所贴方块必须匹配 |
-| `leaves` | 方块 id 或 `#标签` | `#minecraft:leaves` | 参与计数的树叶 |
-| `soil` | 方块 id 或 `#标签` | `#sap_extractor:tree_soil` | 树根下方允许的着地土壤 |
+| `log` | 方块 id、`#标签` 或方块 id 数组 | 必填 | 采集器所贴方块必须匹配 |
+| `leaves` | 方块 id 或 `#标签` | 必填 | 参与计数的树叶 |
+| `soil` | 方块 id 或 `#标签` | 必填 | 树根下方允许的着地土壤 |
 | `fluid` | `{ "id": "...", "amount": n }` | 必填 | 每周期基础产量 |
-| `time` | 整数 | 500 | 基础周期 tick，最小 1 |
-| `min_height` | 整数 | 3 | 有效树的最少连续原木数，最小 1 |
-| `max_height` | 整数 | 32 | 连续原木统计上限，小于 `min_height` 时取 `min_height` |
-| `min_leaves` | 整数 | 3 | 有效树的最少树叶数，最小 1 |
-| `max_leaves` | 整数 | 64 | 树叶计数上限，小于 `min_leaves` 时取 `min_leaves` |
-| `priority` | 整数 | 0 | 匹配顺序，数值越大越优先 |
+| `time` | 整数 | 必填 | 基础周期 tick，最小 1 |
+| `min_height` | 整数 | 必填 | 有效树的最少连续原木数，最小 1 |
+| `max_height` | 整数 | 必填 | 连续原木统计上限，小于 `min_height` 时取 `min_height` |
+| `min_leaves` | 整数 | 必填 | 有效树的最少树叶数，最小 1 |
+| `max_leaves` | 整数 | 必填 | 树叶计数上限，小于 `min_leaves` 时取 `min_leaves` |
 
-`fluid` 同时接受 `{ "fluid": "命名空间:流体", "amount": n }`，这个分支的 `amount` 缺省为 1000；使用 `{ "id": ... }` 形式时必须写出 `amount`。
+全部字段必填，缺任何一个键整条配方在加载阶段报错，不会退回默认值。这样树判定的每个参数都由配方明确给出，不会因为遗漏某个键而悄悄换用另一套阈值。
 
-`log`、`leaves` 与 `soil` 只接受方块 id 或方块标签。解析时直接查询方块注册表，写成物品 id 会在加载阶段报 `Unknown block in extraction recipe`。引用其他模组的方块必须带 `neoforge:mod_loaded` 条件，否则对方模组未安装时同样解析失败。
+`fluid` 也接受 `{ "fluid": "命名空间:流体", "amount": n }`，这个分支的 `amount` 同样必须写出，两种写法都不允许省略数量。
+
+`log`、`leaves` 与 `soil` 接受方块 id 或方块标签，`log` 还接受方块 id 数组。数组只允许放方块 id，不能与标签混写，也不能为空；解析时逐个查询方块注册表，任何一个不存在都会让整条配方加载失败。数组的意义是把同一棵树的多种树干 id 合进一条配方，既不用建标签，也不会像借用现成标签那样把去皮木或木头变种带进来。写成物品 id 会在加载阶段报 `Unknown block in extraction recipe`。引用其他模组的方块必须带 `neoforge:mod_loaded` 条件，否则对方模组未安装时同样解析失败。
 
 现有配方：
 
-- `sap_extractor:extraction/tree_sap_from_logs`：`#minecraft:logs` 与 `#minecraft:leaves`，树汁 10 mB，`priority` 0，作为通用回退，`leaves` 与 `log` 的匹配范围不同，可覆盖未单独配置的树。
-- 8 个原版树种配方：橡木、云杉、白桦、丛林、金合欢、深色橡木、樱桃、红树。除丛林产出 30 mB 胶乳外，其余产出 15 mB 树汁，`priority` 均为 100。
+- 8 个原版树种配方：橡木、云杉、白桦、丛林、金合欢、深色橡木、樱桃、红树。除丛林产出 30 mB 胶乳外，其余产出 15 mB 树汁。
 - `extraction/compat/tconstruct` 下的 4 个史莱姆树配方：血菌木、末影菌木、绿心木、天空木，各产出 15 mB 对应史莱姆流体，`soil` 指定 `#sap_extractor:tconstruct_soil`，只认黏液土壤。
-- `extraction/compat/integrateddynamics` 下的门瑞欧配方：`menril_log` 与 `menril_log_filled` 各一条，各产出 10 mB 门瑞欧树脂。
+- `extraction/compat/integrateddynamics` 下的门瑞欧配方：`log` 为 `["integrateddynamics:menril_log", "integrateddynamics:menril_log_filled"]`，一条覆盖普通与富集原木，产出 10 mB 门瑞欧树脂。
 
 全部配方都位于 `sap_extractor` 命名空间，配方 id 由 `data/sap_extractor/recipe` 之后的路径决定。
-
-## KubeJS
-
-schema 文件位于 `data/sap_extractor/kubejs/recipe_schema/extraction.json`，注册 `sap_extractor.extraction` 配方函数。参数顺序与 schema 的 `keys` 一致：
-
-```js
-ServerEvents.recipes(event => {
-  event.recipes.sap_extractor.extraction(
-    'minecraft:oak_log',                    // log
-    'minecraft:oak_leaves',                 // leaves
-    '#sap_extractor:tree_soil',             // soil
-    Fluid.of('sap_extractor:tree_sap', 15), // fluid 与 amount
-    500,                                     // time
-    3,                                       // min_height
-    16,                                      // max_height
-    3,                                       // min_leaves
-    24,                                      // max_leaves
-    100                                      // priority
-  )
-})
-```
-
-schema 声明 `unique: ["log"]`，把 `log` 作为唯一键，便于脚本排查重复映射。参数较多时可以直接写完整对象：
-
-```js
-event.custom({
-  type: 'sap_extractor:extraction',
-  log: 'minecraft:oak_log',
-  leaves: 'minecraft:oak_leaves',
-  soil: '#sap_extractor:tree_soil',
-  fluid: { id: 'sap_extractor:tree_sap', amount: 15 },
-  time: 500,
-  min_height: 3,
-  max_height: 16,
-  min_leaves: 3,
-  max_leaves: 24,
-  priority: 100
-})
-```
-
-所有采集配方都在 `sap_extractor` 命名空间，按模组过滤会整体删除：
-
-```js
-event.remove({ type: 'sap_extractor:extraction', mod: 'sap_extractor' })
-```
-
-只删除单条配方时按配方 id 过滤，id 由文件路径决定：
-
-```js
-event.remove({ id: 'sap_extractor:extraction/compat/tconstruct/tinkers_skyroot' })
-```
 
 ## 兼容目录
 
@@ -186,7 +135,7 @@ data/sap_extractor/recipe/compat/<modid>/<id>.json
 
 Create 的兼容配方都在 `data/sap_extractor/recipe/compat/create`，全部直接写方块与流体 id：`rubber_from_latex.json` 用压块把 250 mB 胶乳变成橡胶；`tree_sap_bottle.json`、`tree_sap_bucket.json`、`latex_bucket.json` 用注液把 250 mB 树汁装入玻璃瓶、1000 mB 树汁装入桶、1000 mB 胶乳装入桶。
 
-门瑞欧树脂按方块拆成两条配方：`data/sap_extractor/recipe/extraction/compat/integrateddynamics/menril_log.json` 对应 `integrateddynamics:menril_log`，`menril_log_filled.json` 对应 `integrateddynamics:menril_log_filled`；两条的 `leaves` 都是 `integrateddynamics:menril_leaves`，`fluid` 10 mB，`time` 500，`priority` 100，并带 `neoforge:mod_loaded` 条件。主标签把这两个方块 id 以 `required: false` 加入 `tree_logs`，把 `integrateddynamics:drying_basin` 与 `integrateddynamics:mechanical_drying_basin` 加入 `containers`。缺少 `tree_logs` 条目时，采集器右键门瑞欧原木不会出现放置状态。
+门瑞欧树脂只有一条配方 `data/sap_extractor/recipe/extraction/compat/integrateddynamics/menril.json`，`log` 写 `["integrateddynamics:menril_log", "integrateddynamics:menril_log_filled"]`，`leaves` 写 `integrateddynamics:menril_leaves`，`fluid` 10 mB，`time` 500，并带 `neoforge:mod_loaded` 条件。用数组而不是单个方块 id 是因为 `tree_menril` 的 `trunk_provider` 是加权随机，普通原木权重 10、富集原木权重 1，树干会混排；单方块配方会让连通搜索和柱高统计在交界处断开。没有借用 `#integrateddynamics:menril_logs`，是因为那个标签还包含去皮原木、木头与去皮木头，玩家可以搭假树骗过判定。主标签把两个方块 id 以 `required: false` 加入 `tree_logs`，把 `integrateddynamics:drying_basin` 与 `integrateddynamics:mechanical_drying_basin` 加入 `containers`。缺少 `tree_logs` 条目时，采集器右键门瑞欧原木不会出现放置状态。
 
 门瑞欧树由 `integrateddynamics:tree_menril` 生成，主干高度 5 到 9 格，底座与顶部各有十字加粗段，连续原木数为 8 到 12 格，树冠半径 2、固定 5 层。中心列从底座到加粗段顶端保持连续，采集器贴在中心列或加粗段侧面的原木上都能通过连通搜索回到主干底部。10 mB 的基础产量在这个树干尺寸下每周期产出约 53 到 65 mB，与原版树种持平。
 
@@ -194,8 +143,8 @@ Create 的兼容配方都在 `data/sap_extractor/recipe/compat/create`，全部�
 
 | 标签 | 内容 |
 | --- | --- |
-| `sap_extractor:tree_logs` | `#minecraft:logs`，可选 `#tconstruct:tree_log` 与 `#integrateddynamics:menril_logs` |
-| `sap_extractor:tree_soil` | `#minecraft:dirt`、`#c:stones`、石头、花岗岩、闪长岩、安山岩、深板岩、凝灰岩、`minecraft:mud`、`minecraft:muddy_mangrove_roots`、沙、红沙、砂砾、可疑的沙与砂砾 |
+| `sap_extractor:tree_logs` | `#minecraft:logs`，可选 `#tconstruct:tree_log`、`integrateddynamics:menril_log` 与 `integrateddynamics:menril_log_filled` |
+| `sap_extractor:tree_soil` | `#minecraft:dirt`、`#c:stones`、`#c:sands`、`#c:gravels`、`minecraft:mud`、`minecraft:muddy_mangrove_roots`、`minecraft:suspicious_sand`、`minecraft:suspicious_gravel` |
 | `sap_extractor:tconstruct_soil` | `#tconstruct:slimy_soil`、`#tconstruct:slimy_nylium`、`#tconstruct:slimy_grass`，全部为可选条目，匠魂四种史莱姆树的配方专用 |
 | `sap_extractor:tree_roots` | `minecraft:mangrove_roots`、`minecraft:muddy_mangrove_roots`，可选 `tconstruct:enderbark_roots` 与四种颜色变体 |
 | `sap_extractor:containers` | `sap_extractor:fluid_basin`，可选 `create:basin`、`integrateddynamics:drying_basin`、`integrateddynamics:mechanical_drying_basin` |
